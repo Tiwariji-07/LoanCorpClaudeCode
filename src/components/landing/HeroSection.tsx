@@ -16,21 +16,8 @@ export default function HeroSection() {
       component="section"
       sx={{
         position: 'relative',
-        overflow: 'hidden',
-        bgcolor: 'background.paper',
       }}
     >
-      {/* Decorative gradient wave background — spans hero + features */}
-      <Box
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(ellipse at 50% 0%, rgba(71,77,221,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 30%, rgba(208,140,255,0.08) 0%, transparent 50%), radial-gradient(ellipse at 20% 40%, rgba(71,77,221,0.04) 0%, transparent 50%)',
-          pointerEvents: 'none',
-        }}
-      />
-
       {/* Hero content — Figma px: 282px horizontal, no top gap above social proof */}
       <Box
         className="flex flex-col items-center"
