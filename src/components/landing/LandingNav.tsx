@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
@@ -28,19 +29,8 @@ export default function LandingNav() {
       {/* Centered layout with 375px gap between groups — matches Figma */}
       <Box className="flex items-center justify-center gap-[375px]">
         {/* Logo */}
-        <Box sx={{ width: 122, flexShrink: 0 }}>
-          <Typography
-            sx={{
-              fontFamily: '"DM Sans", sans-serif',
-              fontWeight: 700,
-              fontSize: '18px',
-              lineHeight: '24px',
-              letterSpacing: '0.15px',
-              color: 'text.primary',
-            }}
-          >
-            Loan Corp
-          </Typography>
+        <Box sx={{ width: 122, height: 28, flexShrink: 0 }}>
+          <Image src="/icons/common/logo.png" alt="Loan Corp" width={122} height={28} />
         </Box>
 
         {/* Nav Links — center group */}

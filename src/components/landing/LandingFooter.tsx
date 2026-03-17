@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
@@ -14,18 +15,19 @@ interface LinkGroup {
   links: string[]
 }
 
-const LINK_GROUPS: LinkGroup[] = [
-  { title: 'Navigation', links: ['Personal', 'Business'] },
-  { title: 'Help', links: ['Terms & Conditions', 'Privacy Policy'] },
-  { title: 'Resources', links: ['Blogs'] },
-]
-
 const SOCIAL_ICONS = [
   { icon: <XIcon sx={{ fontSize: 18 }} />, label: 'Twitter' },
   { icon: <FacebookOutlinedIcon sx={{ fontSize: 18 }} />, label: 'Facebook' },
   { icon: <InstagramIcon sx={{ fontSize: 18 }} />, label: 'Instagram' },
   { icon: <GitHubIcon sx={{ fontSize: 18 }} />, label: 'GitHub' },
 ]
+
+const LINK_GROUPS: LinkGroup[] = [
+  { title: 'Navigation', links: ['Personal', 'Business'] },
+  { title: 'Help', links: ['Terms & Conditions', 'Privacy Policy'] },
+  { title: 'Resources', links: ['Blogs'] },
+]
+
 
 export default function LandingFooter() {
   return (
@@ -38,18 +40,7 @@ export default function LandingFooter() {
       <Box className="flex items-start justify-center" sx={{ gap: '234px' }}>
         {/* Brand info — Figma: flex-1 */}
         <Box className="flex flex-col gap-[8px]" sx={{ flex: 1 }}>
-          <Typography
-            sx={{
-              fontFamily: '"DM Sans", sans-serif',
-              fontWeight: 700,
-              fontSize: '18px',
-              lineHeight: '24px',
-              letterSpacing: '0.15px',
-              color: 'text.primary',
-            }}
-          >
-            Loan Corp
-          </Typography>
+          <Image src="/icons/common/logo.png" alt="Loan Corp" width={122} height={28} />
           {/* Figma: DM Sans Light 14px, line-height 20px, #2E2C46, 66px height */}
           <Typography
             sx={{

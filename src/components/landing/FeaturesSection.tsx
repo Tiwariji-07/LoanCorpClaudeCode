@@ -71,7 +71,7 @@ export default function FeaturesSection() {
           >
             WHY LOAN CORP
           </Typography>
-          <Box sx={{ fontSize: '14px' }}>💎</Box>
+          <Image src="/icons/landing/why-us-icon.png" alt="" width={24} height={14} />
         </Box>
         <Typography
           sx={{

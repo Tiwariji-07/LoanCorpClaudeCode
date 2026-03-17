@@ -1,14 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import InputBase from '@mui/material/InputBase'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
-import AvatarGroup from '@mui/material/AvatarGroup'
-import Avatar from '@mui/material/Avatar'
 
 export default function HeroSection() {
   const [query, setQuery] = useState('')
@@ -40,21 +38,7 @@ export default function HeroSection() {
       >
         {/* Social proof badge */}
         <Box className="flex items-center justify-center gap-[10px]" sx={{ pt: '24px', mb: '24px' }}>
-          <AvatarGroup
-            max={3}
-            sx={{
-              '& .MuiAvatar-root': {
-                width: 28,
-                height: 28,
-                fontSize: '12px',
-                border: '2px solid white',
-              },
-            }}
-          >
-            <Avatar sx={{ bgcolor: '#474DDD' }}>A</Avatar>
-            <Avatar sx={{ bgcolor: '#FF6800' }}>B</Avatar>
-            <Avatar sx={{ bgcolor: '#16A41D' }}>C</Avatar>
-          </AvatarGroup>
+          <Image src="/icons/landing/customer-icon.png" alt="Customers" width={58} height={30} />
           <Typography
             sx={{
               fontFamily: '"DM Sans", sans-serif',
@@ -86,19 +70,7 @@ export default function HeroSection() {
             >
               Simplifying Smart
             </Typography>
-            <Box
-              sx={{
-                width: 61,
-                height: 58,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '40px',
-                flexShrink: 0,
-              }}
-            >
-              🚀
-            </Box>
+            <Image src="/icons/landing/subheading-icon.png" alt="" width={61} height={58} style={{ flexShrink: 0 }} />
             <Typography
               component="span"
               sx={{
@@ -168,7 +140,7 @@ export default function HeroSection() {
         >
           {/* Search input row */}
           <Box className="flex items-center gap-[8px]">
-            <AutoAwesomeIcon sx={{ fontSize: 17, color: '#474DDD', flexShrink: 0 }} />
+            <Image src="/icons/landing/search-icon.png" alt="" width={17} height={20} style={{ flexShrink: 0 }} />
             <Box
               sx={{
                 width: 0,
