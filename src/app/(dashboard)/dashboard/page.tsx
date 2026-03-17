@@ -136,9 +136,10 @@ export default function DashboardPage() {
         >
           Dashboard
         </Typography>
-        <Box className="flex items-center gap-[8px]">
+        <Box className="flex items-center gap-[8px]" sx={{ flexShrink: 0 }}>
           <Button
             variant="outlined"
+            size="small"
             sx={{
               fontFamily: '"DM Sans", sans-serif',
               fontWeight: 500,
@@ -150,8 +151,10 @@ export default function DashboardPage() {
               textTransform: 'none',
               borderRadius: '8px',
               height: 34,
-              width: 85,
+              minWidth: 85,
+              whiteSpace: 'nowrap',
               boxShadow: 'none',
+              px: '24px',
             }}
           >
             Ask Lex
@@ -160,6 +163,7 @@ export default function DashboardPage() {
             component={Link}
             href="/apply"
             variant="contained"
+            size="small"
             sx={{
               fontFamily: '"DM Sans", sans-serif',
               fontWeight: 500,
@@ -170,8 +174,10 @@ export default function DashboardPage() {
               textTransform: 'none',
               borderRadius: '8px',
               height: 34,
-              width: 133,
+              minWidth: 133,
+              whiteSpace: 'nowrap',
               boxShadow: 'none',
+              px: '24px',
               '&:hover': { boxShadow: 'none', bgcolor: '#3B41C4' },
             }}
           >

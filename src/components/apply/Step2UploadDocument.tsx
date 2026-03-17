@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 
 interface DocItem {
   label: string
@@ -85,14 +84,14 @@ export default function Step2UploadDocument() {
                 borderRadius: '8px',
               }}
             >
-              {/* Icon */}
-              {isUploaded ? (
-                <CheckCircleIcon sx={{ fontSize: 16, color: '#16A41D', flexShrink: 0 }} />
-              ) : (
-                <DescriptionOutlinedIcon
-                  sx={{ fontSize: 16, color: '#7F879E', flexShrink: 0, opacity: 0.5 }}
-                />
-              )}
+              {/* Icon — Figma: 16×16 doc icon, green for uploaded, gray for pending */}
+              <Image
+                src={isUploaded ? '/icons/loan/doc-uploaded.png' : '/icons/loan/doc-pending.png'}
+                alt=""
+                width={16}
+                height={16}
+                style={{ flexShrink: 0, ...(isUploaded ? {} : { mixBlendMode: 'luminosity' }) }}
+              />
 
               {/* Label + description */}
               <Box className="flex items-center gap-[5px]" sx={{ flex: 1, minWidth: 0 }}>

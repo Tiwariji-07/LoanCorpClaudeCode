@@ -7,8 +7,6 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
-import IconButton from '@mui/material/IconButton'
 import Stepper from '@/components/apply/Stepper'
 import StepHeader from '@/components/apply/StepHeader'
 import Step1PersonalDetails from '@/components/apply/Step1PersonalDetails'
@@ -39,14 +37,13 @@ export default function ApplyPage() {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        width: '100%',
-        minHeight: 'calc(100vh - 62px - 30px)',
-        mx: '-28px',
-        mt: '-30px',
+        width: '100vw',
+        height: '100vh',
         bgcolor: 'white',
+        overflow: 'hidden',
       }}
     >
-      {/* Top Nav — Figma: 67px, shadow, logo image + title + Exit button */}
+      {/* Top Nav — Figma: 67px, shadow, logo + title + Exit */}
       <Box
         sx={{
           display: 'flex',
@@ -58,15 +55,11 @@ export default function ApplyPage() {
           boxShadow: '0px 1px 4px 0px rgba(0,0,0,0.05)',
           flexShrink: 0,
           bgcolor: 'white',
+          zIndex: 1,
         }}
       >
         <Box className="flex items-center gap-[12px]">
-          <Image
-            src="/icons/common/wizard-logo.png"
-            alt="Home"
-            width={44}
-            height={44}
-          />
+          <Image src="/icons/common/wizard-logo.png" alt="Home" width={44} height={44} />
           <Typography
             sx={{
               fontFamily: '"DM Sans", sans-serif',
@@ -92,8 +85,8 @@ export default function ApplyPage() {
             textTransform: 'none',
             borderRadius: '12px',
             height: 42,
-            width: 130,
             whiteSpace: 'nowrap',
+            flexShrink: 0,
           }}
         >
           Exit Application
@@ -101,33 +94,25 @@ export default function ApplyPage() {
       </Box>
 
       {/* Body: sidebar stepper + content */}
-      <Box className="flex items-start" sx={{ flex: 1, minHeight: 0 }}>
-        {/* Left sidebar — Figma: 409px, #F8F9FD, pl:84 pr:52 pt:44 */}
+      <Box sx={{ display: 'flex', flex: 1, minHeight: 0 }}>
+        {/* Left sidebar — Figma: 409px, #F8F9FD */}
         <Box
           sx={{
             width: 409,
             flexShrink: 0,
-            alignSelf: 'stretch',
             bgcolor: '#F8F9FD',
             pl: '84px',
             pr: '52px',
             pt: '44px',
+            alignSelf: 'stretch',
           }}
         >
           <Stepper steps={STEPS} activeStep={activeStep} />
         </Box>
 
-        {/* Right content */}
-        <Box
-          sx={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            minWidth: 0,
-            minHeight: 0,
-          }}
-        >
-          {/* Scrollable content — Figma: pt:44 px:100, 24px gap */}
+        {/* Right: content + footer */}
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0 }}>
+          {/* Scrollable content */}
           <Box
             sx={{
               flex: 1,
@@ -150,7 +135,7 @@ export default function ApplyPage() {
             {activeStep === 3 && <Step4Summary />}
           </Box>
 
-          {/* Footer — Figma: 90px, top border, px:100 */}
+          {/* Footer — Figma: 90px, top border */}
           <Box
             sx={{
               display: 'flex',
@@ -164,21 +149,18 @@ export default function ApplyPage() {
               gap: '20px',
             }}
           >
-            {/* AI assist (steps 1-3, i.e. activeStep > 0) */}
+            {/* AI assist (steps 1-3) */}
             {activeStep > 0 && (
-              <IconButton
-                sx={{
-                  width: 35,
-                  height: 35,
-                  bgcolor: 'rgba(71, 77, 221, 0.08)',
-                  borderRadius: '50%',
-                }}
-              >
-                <AutoAwesomeIcon sx={{ fontSize: 20, color: '#474DDD' }} />
-              </IconButton>
+              <Image
+                src="/icons/common/ai-assist.png"
+                alt="AI Assist"
+                width={35}
+                height={35}
+                style={{ flexShrink: 0 }}
+              />
             )}
 
-            {/* Back button — Figma: outlined, startIcon = ← arrow */}
+            {/* Back button */}
             {activeStep > 0 && (
               <Button
                 variant="outlined"
@@ -196,6 +178,7 @@ export default function ApplyPage() {
                   borderRadius: '12px',
                   height: 42,
                   whiteSpace: 'nowrap',
+                  flexShrink: 0,
                   pl: '16px',
                   pr: '24px',
                 }}
@@ -204,7 +187,7 @@ export default function ApplyPage() {
               </Button>
             )}
 
-            {/* Next button — Figma: filled, startIcon = → arrow (NOT endIcon) */}
+            {/* Next / Submit */}
             <Button
               variant="contained"
               startIcon={
@@ -224,6 +207,7 @@ export default function ApplyPage() {
                 borderRadius: '12px',
                 height: 42,
                 whiteSpace: 'nowrap',
+                flexShrink: 0,
                 pl: activeStep < 3 ? '16px' : '24px',
                 pr: '24px',
                 boxShadow: 'none',
