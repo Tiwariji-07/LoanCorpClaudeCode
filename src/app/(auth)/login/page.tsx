@@ -36,15 +36,27 @@ export default function LoginPage() {
 
     try {
       const userInfo = await wmLogin(username, password)
+      const roleName = userInfo.userRoles?.[0] ?? 'CUSTOMER'
 
-      setAuth({
-        id: userInfo.userId ?? userInfo.userName,
-        name: userInfo.userName,
-        email: userInfo.userId ?? userInfo.userName,
-        role: userInfo.userRoles?.[0] ?? 'CUSTOMER',
-      })
+      setAuth(
+        {
+          id: userInfo.userId ?? userInfo.userName,
+          name: userInfo.userName,
+          email: userInfo.userId ?? userInfo.userName,
+        },
+        {
+          id: roleName === 'APPROVER' ? 1 : 2,
+          name: roleName,
+          displayName: roleName === 'APPROVER' ? 'Approver' : 'Customer',
+        },
+      )
 
-      router.push('/dashboard')
+      // Route based on role
+      if (roleName === 'APPROVER') {
+        router.push('/officer/dashboard')
+      } else {
+        router.push('/dashboard')
+      }
     } catch (err: unknown) {
       const msg = (err as Error)?.message
       if (msg === 'Invalid credentials') {

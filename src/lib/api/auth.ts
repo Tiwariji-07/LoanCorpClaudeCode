@@ -25,10 +25,10 @@ const DEMO_USERS: Record<
   string,
   { password: string; name: string; email: string; role: string }
 > = {
-  admin: {
-    password: "admin",
+  "john.doe@wavemaker.com": {
+    password: "Password@123",
     name: "John Doe",
-    email: "john.doe@example.com",
+    email: "john.doe@wavemaker.com",
     role: "APPROVER",
   },
   customer: {
@@ -66,8 +66,8 @@ export async function wmLogin(
   password: string,
 ): Promise<WmUserInfo> {
   // First check if backend security is enabled
-  const secInfo = await wmGetSecurityInfo();
-  // const secInfo = { securityEnabled: false };
+  // const secInfo = await wmGetSecurityInfo();
+  const secInfo = { securityEnabled: false };
 
   if (secInfo.securityEnabled) {
     // Real WaveMaker auth: POST /j_spring_security_check
