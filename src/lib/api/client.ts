@@ -5,23 +5,20 @@ const apiClient = axios.create({
   baseURL: (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000') + '/services',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
+  // withCredentials is only needed when backend security is enabled (cookie-based sessions).
+  // Enable it once WaveMaker security is turned on. Keeping it off avoids CORS issues.
 })
 
-// Attach auth token from localStorage on every request
-apiClient.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('auth_token')
-    if (token) config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
-
-// Global 401 handler — clear token and redirect to login
+// Global 401 handler — redirect to login on unauthorized
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token')
+      // Clear persisted auth state and cookie
+      try {
+        localStorage.removeItem('loancorp-auth')
+        document.cookie = 'loancorp_authenticated=; path=/; max-age=0'
+      } catch { /* noop */ }
       window.location.href = '/login'
     }
     return Promise.reject(error)

@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import Box from '@mui/material/Box'
@@ -8,8 +10,57 @@ import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import CircularProgress from '@mui/material/CircularProgress'
+import Alert from '@mui/material/Alert'
+import { wmLogin } from '@/lib/api/auth'
+import { useAuthStore } from '@/stores/auth.store'
 
 export default function LoginPage() {
+  const router = useRouter()
+  const setAuth = useAuthStore((s) => s.setAuth)
+
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [remember, setRemember] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleLogin = async () => {
+    if (!username.trim() || !password.trim()) {
+      setError('Please enter both username and password')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+
+    try {
+      const userInfo = await wmLogin(username, password)
+
+      setAuth({
+        id: userInfo.userId ?? userInfo.userName,
+        name: userInfo.userName,
+        email: userInfo.userId ?? userInfo.userName,
+        role: userInfo.userRoles?.[0] ?? 'CUSTOMER',
+      })
+
+      router.push('/dashboard')
+    } catch (err: unknown) {
+      const msg = (err as Error)?.message
+      if (msg === 'Invalid credentials') {
+        setError('Invalid username or password')
+      } else {
+        setError('Unable to connect to server. Please try again.')
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleLogin()
+  }
+
   return (
     <Box className="flex items-start" sx={{ minHeight: '100vh', width: '100%' }}>
       {/* ── Left panel: hero with background image ── */}
@@ -119,6 +170,17 @@ export default function LoginPage() {
           </Typography>
         </Box>
 
+        {/* Error alert */}
+        {error && (
+          <Alert
+            severity="error"
+            onClose={() => setError('')}
+            sx={{ width: '100%', fontFamily: '"DM Sans", sans-serif' }}
+          >
+            {error}
+          </Alert>
+        )}
+
         {/* Form fields */}
         <Box className="flex flex-col gap-[24px] items-start" sx={{ width: '100%' }}>
           {/* Username */}
@@ -126,6 +188,11 @@ export default function LoginPage() {
             fullWidth
             placeholder="Username"
             variant="outlined"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={loading}
+            autoComplete="username"
             sx={{
               '& .MuiOutlinedInput-root': {
                 height: 56,
@@ -144,6 +211,11 @@ export default function LoginPage() {
             placeholder="Password"
             type="password"
             variant="outlined"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={loading}
+            autoComplete="current-password"
             sx={{
               '& .MuiOutlinedInput-root': {
                 height: 56,
@@ -162,6 +234,8 @@ export default function LoginPage() {
               control={
                 <Checkbox
                   size="small"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
                   sx={{
                     color: '#7F879E',
                     '&.Mui-checked': { color: '#474DDD' },
@@ -207,6 +281,9 @@ export default function LoginPage() {
           <Button
             fullWidth
             variant="contained"
+            onClick={handleLogin}
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={18} sx={{ color: 'white' }} /> : undefined}
             sx={{
               fontFamily: '"Inter", sans-serif',
               fontWeight: 500,
@@ -222,7 +299,7 @@ export default function LoginPage() {
               '&:hover': { boxShadow: 'none', bgcolor: '#3B41C4' },
             }}
           >
-            Login
+            {loading ? 'Signing in...' : 'Login'}
           </Button>
 
           {/* Sign up link */}

@@ -1,12 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
 import Slider from '@mui/material/Slider'
+import CircularProgress from '@mui/material/CircularProgress'
+import { useLoanTypeControllerFindLoanTypes } from '@/lib/api/generated/loan-type-controller/loan-type-controller'
+import type { LoanType } from '@/types/api/loanType'
+import type { LoanFormData } from '@/app/(apply)/apply/page'
 
 const fieldSx = {
   '& .MuiOutlinedInput-root': {
@@ -18,29 +22,112 @@ const fieldSx = {
   },
 }
 
-const smallFieldSx = {
-  '& .MuiOutlinedInput-root': {
-    height: 40,
-    borderRadius: '8px',
-    fontFamily: '"DM Sans", sans-serif',
-    fontSize: '16px',
-    '& fieldset': { borderColor: '#E5E5EC', borderWidth: 1 },
-  },
+/* ─── EMI Calculation Helpers ─── */
+
+interface LoanCostBreakdown {
+  totalCost: number
+  principal: number
+  tenure: number
+  interestRate: number
+  monthlyEmi: number
+  avgYearlyCost: number
+  totalInterest: number
+  taxesAndFees: number
+  principalPct: number
+  interestPct: number
+  taxesPct: number
 }
 
-const COST_FIELDS = [
-  { label: 'Total cost', value: '$1.351M' },
-  { label: 'Principal', value: '$650K' },
-  { label: 'Tenure', value: '25y' },
-  { label: 'Interest APR', value: '6.85%' },
-  { label: 'Monthly EMI', value: '$4.47K' },
-  { label: 'Avg. yearly cost', value: '$54K' },
-]
+/** Standard amortization EMI formula: E = P * r * (1+r)^n / ((1+r)^n - 1) */
+function calculateLoanCost(principal: number, tenureYears: number, annualRate: number): LoanCostBreakdown {
+  const months = tenureYears * 12
+  const monthlyRate = annualRate / 100 / 12
 
-export default function Step3LoanDetails() {
+  let monthlyEmi: number
+  if (monthlyRate === 0) {
+    monthlyEmi = principal / months
+  } else {
+    const factor = Math.pow(1 + monthlyRate, months)
+    monthlyEmi = principal * monthlyRate * factor / (factor - 1)
+  }
+
+  const totalCost = monthlyEmi * months
+  const totalInterest = totalCost - principal
+  const taxesAndFees = principal * 0.02 // 2% estimate for taxes & fees
+  const grandTotal = totalCost + taxesAndFees
+  const avgYearlyCost = grandTotal / tenureYears
+
+  const principalPct = Math.round((principal / grandTotal) * 100)
+  const interestPct = Math.round((totalInterest / grandTotal) * 100)
+  const taxesPct = 100 - principalPct - interestPct
+
+  return {
+    totalCost: grandTotal,
+    principal,
+    tenure: tenureYears,
+    interestRate: annualRate,
+    monthlyEmi,
+    avgYearlyCost,
+    totalInterest,
+    taxesAndFees,
+    principalPct,
+    interestPct,
+    taxesPct,
+  }
+}
+
+/** Default interest rates per loan category */
+const INTEREST_RATES: Record<string, number> = {
+  'Home Improvement': 8.5,
+  'Loan Consolidation': 9.0,
+  'Wedding': 10.0,
+}
+const DEFAULT_RATE = 8.5
+
+function formatCurrency(value: number): string {
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(3)}M`
+  if (value >= 1_000) return `$${(value / 1_000).toFixed(value >= 10_000 ? 0 : 2)}K`
+  return `$${value.toFixed(0)}`
+}
+
+interface Props {
+  onDataChange: (data: LoanFormData) => void
+}
+
+export default function Step3LoanDetails({ onDataChange }: Props) {
   const [loanAmount, setLoanAmount] = useState(271000)
   const [tenure, setTenure] = useState(12)
   const [autopay, setAutopay] = useState(true)
+  const [category, setCategory] = useState('')
+
+  // Fetch loan types from API
+  const { data: loanTypesPage, isLoading: loanTypesLoading } = useLoanTypeControllerFindLoanTypes()
+  const loanTypes = (loanTypesPage?.content ?? []) as LoanType[]
+
+  // Set default category when loan types load
+  useEffect(() => {
+    if (loanTypes.length > 0 && !category) {
+      setCategory(loanTypes[0].name ?? '')
+    }
+  }, [loanTypes, category])
+
+  // Calculate loan cost details in real-time
+  const rate = INTEREST_RATES[category] ?? DEFAULT_RATE
+  const cost = useMemo(
+    () => calculateLoanCost(loanAmount, tenure, rate),
+    [loanAmount, tenure, rate],
+  )
+
+  // Sync to parent whenever values change
+  useEffect(() => {
+    if (!category) return
+    onDataChange({
+      loanCategory: category,
+      autoPayEnabled: autopay,
+      principleAmount: loanAmount,
+      tenure,
+    })
+  }, [loanAmount, tenure, autopay, category, onDataChange])
 
   return (
     <Box className="flex flex-col gap-[32px]" sx={{ width: '100%', flex: 1 }}>
@@ -59,14 +146,24 @@ export default function Step3LoanDetails() {
       >
         <TextField
           select
-          defaultValue="home-improvement"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
           variant="outlined"
+          disabled={loanTypesLoading}
           sx={{ width: 346, ...fieldSx }}
+          slotProps={{
+            input: {
+              endAdornment: loanTypesLoading ? (
+                <CircularProgress size={20} sx={{ mr: 2 }} />
+              ) : undefined,
+            },
+          }}
         >
-          <MenuItem value="home-improvement">Home Improvement</MenuItem>
-          <MenuItem value="personal">Personal Loan</MenuItem>
-          <MenuItem value="auto">Auto Loan</MenuItem>
-          <MenuItem value="wedding">Wedding</MenuItem>
+          {loanTypes.map((lt) => (
+            <MenuItem key={lt.id} value={lt.name ?? ''}>
+              {lt.displayName ?? lt.name}
+            </MenuItem>
+          ))}
         </TextField>
 
         <Box className="flex items-center gap-[16px]">
@@ -131,7 +228,7 @@ export default function Step3LoanDetails() {
         />
       </Box>
 
-      {/* Loan cost details */}
+      {/* Loan cost details — computed in real-time */}
       <Box className="flex flex-col gap-[12px]" sx={{ width: '100%' }}>
         <Typography
           sx={{
@@ -168,7 +265,14 @@ export default function Step3LoanDetails() {
               borderColor: '#E5E5EC',
             }}
           >
-            {COST_FIELDS.map((f) => (
+            {[
+              { label: 'Total cost', value: formatCurrency(cost.totalCost) },
+              { label: 'Principal', value: formatCurrency(cost.principal) },
+              { label: 'Tenure', value: `${cost.tenure}y` },
+              { label: 'Interest APR', value: `${cost.interestRate.toFixed(2)}%` },
+              { label: 'Monthly EMI', value: formatCurrency(cost.monthlyEmi) },
+              { label: 'Avg. yearly cost', value: formatCurrency(cost.avgYearlyCost) },
+            ].map((f) => (
               <Box key={f.label} className="flex flex-col gap-[4px]" sx={{ flex: 1 }}>
                 <Typography
                   sx={{
@@ -203,29 +307,29 @@ export default function Step3LoanDetails() {
             {/* Amount labels */}
             <Box className="flex justify-between">
               <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 500, fontSize: '14px', color: '#2E2C46' }}>
-                $650,000
+                {formatCurrency(cost.principal)}
               </Typography>
               <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 500, fontSize: '14px', color: '#2E2C46' }}>
-                $690,000
+                {formatCurrency(cost.totalInterest)}
               </Typography>
               <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 500, fontSize: '14px', color: '#2E2C46' }}>
-                $11,500
+                {formatCurrency(cost.taxesAndFees)}
               </Typography>
             </Box>
 
             {/* Bar */}
             <Box className="flex" sx={{ width: '100%', height: 16, borderRadius: '8px', overflow: 'hidden' }}>
-              <Box sx={{ width: '48.1%', bgcolor: '#FF6800' }} />
-              <Box sx={{ width: '51.1%', bgcolor: '#474DDD' }} />
-              <Box sx={{ width: '0.8%', bgcolor: '#D08CFF' }} />
+              <Box sx={{ width: `${cost.principalPct}%`, bgcolor: '#FF6800' }} />
+              <Box sx={{ width: `${cost.interestPct}%`, bgcolor: '#474DDD' }} />
+              <Box sx={{ width: `${cost.taxesPct}%`, bgcolor: '#D08CFF' }} />
             </Box>
 
             {/* Legend */}
             <Box className="flex gap-[20px] items-center justify-end" sx={{ mt: '8px' }}>
               {[
-                { color: '#FF6800', label: 'Principal - 50%' },
-                { color: '#474DDD', label: 'Interest paid over tenure - 48%' },
-                { color: '#D08CFF', label: 'Taxes & Fees - 2%' },
+                { color: '#FF6800', label: `Principal - ${cost.principalPct}%` },
+                { color: '#474DDD', label: `Interest paid over tenure - ${cost.interestPct}%` },
+                { color: '#D08CFF', label: `Taxes & Fees - ${cost.taxesPct}%` },
               ].map((item) => (
                 <Box key={item.label} className="flex items-center gap-[8px]">
                   <Box sx={{ width: 12, height: 12, borderRadius: '2px', bgcolor: item.color, flexShrink: 0 }} />

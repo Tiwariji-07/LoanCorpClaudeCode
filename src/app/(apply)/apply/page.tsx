@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Image from 'next/image'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
+import CircularProgress from '@mui/material/CircularProgress'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import Stepper from '@/components/apply/Stepper'
@@ -14,6 +15,11 @@ import Step2UploadDocument from '@/components/apply/Step2UploadDocument'
 import Step3LoanDetails from '@/components/apply/Step3LoanDetails'
 import Step4Summary from '@/components/apply/Step4Summary'
 import LoanSubmissionDialog from '@/components/loans/LoanSubmissionDialog'
+import { useManageLoanControllerCreateLoan } from '@/lib/api/generated/manage-loan-controller/manage-loan-controller'
+import { useAuthStore } from '@/stores/auth.store'
+import type { PersonDTO } from '@/types/api/personDTO'
+import type { LoanDTO } from '@/types/api/loanDTO'
+import type { Loan } from '@/types/api/loan'
 
 const STEPS = ['Personal Details', 'Documents Upload', 'Loan Details', 'Review application']
 
@@ -27,16 +33,87 @@ const STEP_HEADERS = [
 const NEXT_LABELS = ['Documents Upload', 'Loan Details', 'Review Application', 'Submit Application']
 const BACK_LABELS = ['', 'Personal Details', 'Documents Upload', 'Loan Details']
 
+/* ─── Form data shape collected across steps ─── */
+
+export interface PersonFormData {
+  firstName: string
+  lastName: string
+  dob: string
+  socialSecurityNumber: string
+  email: string
+  phoneNumber: string
+  address: string
+  areaCode: string
+  state: string
+}
+
+export interface LoanFormData {
+  loanCategory: string
+  autoPayEnabled: boolean
+  principleAmount: number
+  tenure: number
+}
+
 export default function ApplyPage() {
   const [activeStep, setActiveStep] = useState(0)
   const [submitted, setSubmitted] = useState(false)
   const [submittedLoanId, setSubmittedLoanId] = useState<string | undefined>()
+  const [submitting, setSubmitting] = useState(false)
+
+  // Form data lifted from step components
+  const [personData, setPersonData] = useState<PersonFormData>({
+    firstName: '', lastName: '', dob: '', socialSecurityNumber: '',
+    email: '', phoneNumber: '', address: '', areaCode: '', state: '',
+  })
+  const [loanData, setLoanData] = useState<LoanFormData>({
+    loanCategory: 'Home Improvement', autoPayEnabled: true,
+    principleAmount: 271000, tenure: 12,
+  })
+
+  const user = useAuthStore((s) => s.user)
+
+  // Create loan mutation
+  const { mutateAsync: createLoan } = useManageLoanControllerCreateLoan()
+
+  const handleSubmit = useCallback(async () => {
+    setSubmitting(true)
+    try {
+      const fullAddress = [personData.address, personData.areaCode, personData.state]
+        .filter(Boolean)
+        .join(', ')
+
+      const person: PersonDTO = {
+        email: personData.email || user?.email,
+        firstName: personData.firstName,
+        lastName: personData.lastName,
+        socialSecurityNumber: personData.socialSecurityNumber,
+        phoneNumber: personData.phoneNumber,
+        address: fullAddress,
+        dob: personData.dob,
+      }
+
+      const dto: LoanDTO = {
+        principleAmount: loanData.principleAmount,
+        tenure: loanData.tenure,
+        loanCategory: loanData.loanCategory,
+        autoPayEnabled: loanData.autoPayEnabled,
+        person,
+      }
+
+      const result = await createLoan({ data: dto }) as Loan
+      setSubmittedLoanId(result.applicationId ?? `LC${result.id}`)
+      setSubmitted(true)
+    } catch (err) {
+      console.error('Loan submission failed:', err)
+      alert('Failed to submit application. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }, [personData, loanData, user, createLoan])
 
   const handleNext = () => {
     if (activeStep === STEPS.length - 1) {
-      // Final step: simulate submission
-      setSubmittedLoanId('HL-2026-123456')
-      setSubmitted(true)
+      handleSubmit()
       return
     }
     setActiveStep((s) => Math.min(s + 1, STEPS.length - 1))
@@ -54,7 +131,7 @@ export default function ApplyPage() {
         overflow: 'hidden',
       }}
     >
-      {/* Top Nav — Figma: 67px, shadow, logo + title + Exit */}
+      {/* Top Nav */}
       <Box
         sx={{
           display: 'flex',
@@ -82,11 +159,12 @@ export default function ApplyPage() {
               whiteSpace: 'nowrap',
             }}
           >
-            Application for Home Improvement loan
+            Application for {loanData.loanCategory} loan
           </Typography>
         </Box>
         <Button
           variant="text"
+          href="/dashboard"
           sx={{
             fontFamily: '"DM Sans", sans-serif',
             fontWeight: 500,
@@ -104,9 +182,9 @@ export default function ApplyPage() {
         </Button>
       </Box>
 
-      {/* Body: sidebar stepper + content */}
+      {/* Body */}
       <Box sx={{ display: 'flex', flex: 1, minHeight: 0 }}>
-        {/* Left sidebar — Figma: 409px, #F8F9FD */}
+        {/* Left sidebar stepper */}
         <Box
           sx={{
             width: 409,
@@ -121,9 +199,8 @@ export default function ApplyPage() {
           <Stepper steps={STEPS} activeStep={activeStep} />
         </Box>
 
-        {/* Right: content + footer */}
+        {/* Right content */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0 }}>
-          {/* Scrollable content */}
           <Box
             sx={{
               flex: 1,
@@ -140,13 +217,19 @@ export default function ApplyPage() {
               title={STEP_HEADERS[activeStep].title}
               subtitle={STEP_HEADERS[activeStep].subtitle}
             />
-            {activeStep === 0 && <Step1PersonalDetails />}
+            {activeStep === 0 && (
+              <Step1PersonalDetails onDataChange={setPersonData} />
+            )}
             {activeStep === 1 && <Step2UploadDocument />}
-            {activeStep === 2 && <Step3LoanDetails />}
-            {activeStep === 3 && <Step4Summary />}
+            {activeStep === 2 && (
+              <Step3LoanDetails onDataChange={setLoanData} />
+            )}
+            {activeStep === 3 && (
+              <Step4Summary personData={personData} loanData={loanData} />
+            )}
           </Box>
 
-          {/* Footer — Figma: 90px, top border */}
+          {/* Footer */}
           <Box
             sx={{
               display: 'flex',
@@ -160,7 +243,6 @@ export default function ApplyPage() {
               gap: '20px',
             }}
           >
-            {/* AI assist (steps 1-3) */}
             {activeStep > 0 && (
               <Image
                 src="/icons/common/ai-assist.png"
@@ -171,12 +253,12 @@ export default function ApplyPage() {
               />
             )}
 
-            {/* Back button */}
             {activeStep > 0 && (
               <Button
                 variant="outlined"
                 startIcon={<ArrowBackIcon sx={{ fontSize: '14px !important' }} />}
                 onClick={handleBack}
+                disabled={submitting}
                 sx={{
                   fontFamily: '"DM Sans", sans-serif',
                   fontWeight: 500,
@@ -198,15 +280,17 @@ export default function ApplyPage() {
               </Button>
             )}
 
-            {/* Next / Submit */}
             <Button
               variant="contained"
               startIcon={
-                activeStep < 3 ? (
+                submitting ? (
+                  <CircularProgress size={16} sx={{ color: 'white' }} />
+                ) : activeStep < 3 ? (
                   <ArrowForwardIcon sx={{ fontSize: '14px !important' }} />
                 ) : undefined
               }
               onClick={handleNext}
+              disabled={submitting}
               sx={{
                 fontFamily: '"DM Sans", sans-serif',
                 fontWeight: 500,
@@ -225,13 +309,13 @@ export default function ApplyPage() {
                 '&:hover': { boxShadow: 'none', bgcolor: '#3B41C4' },
               }}
             >
-              {NEXT_LABELS[activeStep]}
+              {submitting ? 'Submitting...' : NEXT_LABELS[activeStep]}
             </Button>
           </Box>
         </Box>
       </Box>
 
-      {/* Submission success dialog */}
+      {/* Success dialog */}
       <LoanSubmissionDialog
         open={submitted}
         onClose={() => setSubmitted(false)}
