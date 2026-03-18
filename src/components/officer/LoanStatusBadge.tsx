@@ -3,16 +3,16 @@
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 
-/* Styles keyed by LoanStatus.displayName from GET /loancorp/LoanStatus */
+/* All badges use a light tinted background with colored text (no solid fills) */
 const STATUS_STYLES: Record<string, { bgcolor: string; color: string }> = {
-  Pending:        { bgcolor: '#E8EAF6', color: '#474DDD' },
-  Awaiting:       { bgcolor: '#FFF3E0', color: '#E65100' },
+  Pending:        { bgcolor: '#EEEDF9', color: '#474DDD' },
+  Awaiting:       { bgcolor: '#EEEDF9', color: '#474DDD' },
   'In-Progress':  { bgcolor: '#E3F2FD', color: '#1565C0' },
-  Approved:       { bgcolor: '#16A41D', color: '#FFFFFF' },
-  Rejected:       { bgcolor: '#BA1A1A', color: '#FFFFFF' },
+  Approved:       { bgcolor: '#E8F5E9', color: '#16A41D' },
+  Rejected:       { bgcolor: '#FDECEA', color: '#BA1A1A' },
 }
 
-const DEFAULT_STYLE = { bgcolor: '#E8EAF6', color: '#474DDD' }
+const DEFAULT_STYLE = { bgcolor: '#EEEDF9', color: '#474DDD' }
 
 interface Props {
   status: string

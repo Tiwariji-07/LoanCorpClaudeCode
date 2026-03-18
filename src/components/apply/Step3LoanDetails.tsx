@@ -101,7 +101,7 @@ export default function Step3LoanDetails({ onDataChange }: Props) {
   const [category, setCategory] = useState('')
 
   // Fetch loan types from API
-  const { data: loanTypesPage, isLoading: loanTypesLoading } = useLoanTypeControllerFindLoanTypes()
+  const { data: loanTypesPage, isLoading: loanTypesLoading } = useLoanTypeControllerFindLoanTypes({ page: 1, size: 50 })
   const loanTypes = (loanTypesPage?.content ?? []) as LoanType[]
 
   // Set default category when loan types load
