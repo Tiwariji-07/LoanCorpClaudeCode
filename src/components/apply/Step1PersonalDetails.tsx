@@ -3,6 +3,10 @@
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
+import Skeleton from '@mui/material/Skeleton'
+import { usePersonControllerFindPersons } from '@/lib/api/generated/person-controller/person-controller'
+import { useAuthStore } from '@/stores/auth.store'
+import type { Person } from '@/types/api/person'
 
 const fieldSx = {
   '& .MuiOutlinedInput-root': {
@@ -28,13 +32,61 @@ const helperSx = {
   color: '#7F879E',
 }
 
+function parseAddress(address?: string) {
+  if (!address) return { street: '', areaCode: '', state: '' }
+  // Try to extract parts from comma-separated address
+  const parts = address.split(',').map((p) => p.trim())
+  if (parts.length >= 3) {
+    return { street: parts.slice(0, -2).join(', '), areaCode: parts[parts.length - 2], state: parts[parts.length - 1] }
+  }
+  if (parts.length === 2) {
+    return { street: parts[0], areaCode: '', state: parts[1] }
+  }
+  return { street: address, areaCode: '', state: '' }
+}
+
 export default function Step1PersonalDetails() {
+  const userEmail = useAuthStore((s) => s.user?.email)
+
+  const { data: personPage, isLoading } = usePersonControllerFindPersons(
+    { q: `email='${userEmail}'`, page: 1, size: 1 },
+    { query: { enabled: !!userEmail } }
+  ) as { data: { content?: Person[] } | undefined; isLoading: boolean }
+
+  const person: Person | undefined = (personPage as { content?: Person[] })?.content?.[0]
+  const addr = parseAddress(person?.address)
+
+  if (isLoading) {
+    return (
+      <Box className="flex flex-col gap-[44px]" sx={{ width: '100%' }}>
+        {[1, 2, 3, 4].map((r) => (
+          <Box key={r} className="flex gap-[32px]" sx={{ width: '100%' }}>
+            <Skeleton variant="rounded" height={56} sx={{ flex: 1, borderRadius: '8px' }} />
+            <Skeleton variant="rounded" height={56} sx={{ flex: 1, borderRadius: '8px' }} />
+          </Box>
+        ))}
+      </Box>
+    )
+  }
+
   return (
     <Box className="flex flex-col gap-[44px]" sx={{ width: '100%' }}>
       {/* Row 1: First Name + Last Name */}
       <Box className="flex gap-[32px] items-center justify-center" sx={{ width: '100%' }}>
-        <TextField fullWidth placeholder="First Name" variant="outlined" sx={{ flex: 1, ...fieldSx }} />
-        <TextField fullWidth placeholder="Last Name" variant="outlined" sx={{ flex: 1, ...fieldSx }} />
+        <TextField
+          fullWidth
+          placeholder="First Name"
+          defaultValue={person?.firstName ?? ''}
+          variant="outlined"
+          sx={{ flex: 1, ...fieldSx }}
+        />
+        <TextField
+          fullWidth
+          placeholder="Last Name"
+          defaultValue={person?.lastName ?? ''}
+          variant="outlined"
+          sx={{ flex: 1, ...fieldSx }}
+        />
       </Box>
 
       {/* Row 2: Date of birth + SSN */}
@@ -43,6 +95,7 @@ export default function Step1PersonalDetails() {
           fullWidth
           placeholder="Date of birth"
           type="date"
+          defaultValue={person?.dob ?? ''}
           variant="outlined"
           helperText="You must be 18 years or older"
           InputLabelProps={{ shrink: true }}
@@ -51,11 +104,11 @@ export default function Step1PersonalDetails() {
             ...fieldSx,
             '& .MuiFormHelperText-root': helperSx,
           }}
-          inputProps={{ placeholder: 'Date of birth' }}
         />
         <TextField
           fullWidth
           placeholder="Social Security Number"
+          defaultValue={person?.socialSecurityNumber ?? ''}
           variant="outlined"
           sx={{ flex: 1, ...fieldSx }}
         />
@@ -67,13 +120,16 @@ export default function Step1PersonalDetails() {
           fullWidth
           placeholder="Email address"
           type="email"
+          defaultValue={person?.email ?? ''}
           variant="outlined"
+          InputProps={{ readOnly: !!person?.email }}
           sx={{ flex: 1, ...fieldSx }}
         />
         <TextField
           fullWidth
           placeholder="Mobile number"
           type="tel"
+          defaultValue={person?.phoneNumber ?? ''}
           variant="outlined"
           helperText="We will use this to contact you"
           sx={{
@@ -89,6 +145,7 @@ export default function Step1PersonalDetails() {
         <TextField
           fullWidth
           placeholder="Address"
+          defaultValue={addr.street}
           variant="outlined"
           sx={{ flex: 1, ...fieldSx }}
         />
@@ -96,19 +153,20 @@ export default function Step1PersonalDetails() {
           <TextField
             fullWidth
             placeholder="Area Code"
+            defaultValue={addr.areaCode}
             variant="outlined"
             sx={{ flex: 1, ...fieldSx }}
           />
           <TextField
             fullWidth
             select
-            defaultValue=""
+            defaultValue={addr.state || ''}
             variant="outlined"
             sx={{
               flex: 1,
               ...fieldSx,
               '& .MuiSelect-select': {
-                color: '#7F879E',
+                color: addr.state ? '#2E2C46' : '#7F879E',
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: '16px',
               },
@@ -118,10 +176,11 @@ export default function Step1PersonalDetails() {
             <MenuItem value="" disabled>
               State
             </MenuItem>
-            <MenuItem value="OH">Ohio</MenuItem>
-            <MenuItem value="NY">New York</MenuItem>
-            <MenuItem value="CA">California</MenuItem>
-            <MenuItem value="TX">Texas</MenuItem>
+            <MenuItem value="Hyderabad">Hyderabad</MenuItem>
+            <MenuItem value="Ohio">Ohio</MenuItem>
+            <MenuItem value="New York">New York</MenuItem>
+            <MenuItem value="California">California</MenuItem>
+            <MenuItem value="Texas">Texas</MenuItem>
           </TextField>
         </Box>
       </Box>

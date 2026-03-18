@@ -3,7 +3,7 @@ import { defineConfig } from 'orval'
 export default defineConfig({
   loancorp: {
     input: {
-      target: './openapi.yaml',  // path to your OpenAPI spec
+      target: './LoanCorpAPI.json',
     },
     output: {
       mode: 'tags-split',
@@ -14,7 +14,7 @@ export default defineConfig({
       override: {
         mutator: {
           path: './src/lib/api/client.ts',
-          name: 'default',
+          name: 'customInstance',
         },
         query: {
           useQuery: true,

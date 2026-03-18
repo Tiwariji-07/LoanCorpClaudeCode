@@ -1,7 +1,8 @@
 import axios from 'axios'
+import type { AxiosRequestConfig } from 'axios'
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000',
+  baseURL: (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000') + '/services',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
 })
@@ -27,4 +28,9 @@ apiClient.interceptors.response.use(
   }
 )
 
-export default apiClient
+// Orval mutator — named export used by generated hooks
+export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
+  return apiClient(config).then(({ data }) => data)
+}
+
+export { apiClient }

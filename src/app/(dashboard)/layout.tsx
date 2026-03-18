@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useAuthStore } from '@/stores/auth.store'
 import Box from '@mui/material/Box'
 import Drawer from '@mui/material/Drawer'
 import AppBar from '@mui/material/AppBar'
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
+  const user = useAuthStore((s) => s.user)
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#F8F9FD' }}>
@@ -141,7 +143,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 color: '#2E2C46',
               }}
             >
-              👋🏻 Welcome, Amanda!
+              👋🏻 Welcome, {user?.name ?? 'User'}!
             </Typography>
 
             <Box className="flex items-center gap-[20px]">
