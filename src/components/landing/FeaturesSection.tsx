@@ -53,7 +53,7 @@ export default function FeaturesSection() {
     <Box
       component="section"
       className="flex flex-col items-center"
-      sx={{ px: '94px' }}
+      sx={{ px: '94px', position: 'relative', zIndex: 1 }}
     >
       {/* Section header */}
       <Box className="flex flex-col items-center gap-[8px]" sx={{ pt: '72px', mb: 0, px: '206px', width: '100%' }}>

@@ -49,9 +49,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           },
         }}
       >
-        {/* Logo — Figma: 23×27px brandmark from Figma asset */}
+        {/* Logo — Figma: 23×27px icon-only brandmark (not the full text logo) */}
         <Image
-          src="/icons/common/logo.png"
+          src="/icons/common/sidebar-icon.png"
           alt="LoanCorp"
           width={23}
           height={27}

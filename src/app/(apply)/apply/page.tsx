@@ -13,6 +13,7 @@ import Step1PersonalDetails from '@/components/apply/Step1PersonalDetails'
 import Step2UploadDocument from '@/components/apply/Step2UploadDocument'
 import Step3LoanDetails from '@/components/apply/Step3LoanDetails'
 import Step4Summary from '@/components/apply/Step4Summary'
+import LoanSubmissionDialog from '@/components/loans/LoanSubmissionDialog'
 
 const STEPS = ['Personal Details', 'Documents Upload', 'Loan Details', 'Review application']
 
@@ -28,8 +29,18 @@ const BACK_LABELS = ['', 'Personal Details', 'Documents Upload', 'Loan Details']
 
 export default function ApplyPage() {
   const [activeStep, setActiveStep] = useState(0)
+  const [submitted, setSubmitted] = useState(false)
+  const [submittedLoanId, setSubmittedLoanId] = useState<string | undefined>()
 
-  const handleNext = () => setActiveStep((s) => Math.min(s + 1, STEPS.length - 1))
+  const handleNext = () => {
+    if (activeStep === STEPS.length - 1) {
+      // Final step: simulate submission
+      setSubmittedLoanId('HL-2026-123456')
+      setSubmitted(true)
+      return
+    }
+    setActiveStep((s) => Math.min(s + 1, STEPS.length - 1))
+  }
   const handleBack = () => setActiveStep((s) => Math.max(s - 1, 0))
 
   return (
@@ -219,6 +230,13 @@ export default function ApplyPage() {
           </Box>
         </Box>
       </Box>
+
+      {/* Submission success dialog */}
+      <LoanSubmissionDialog
+        open={submitted}
+        onClose={() => setSubmitted(false)}
+        loanId={submittedLoanId}
+      />
     </Box>
   )
 }

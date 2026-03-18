@@ -6,7 +6,7 @@ import Button from '@mui/material/Button'
 
 export default function CTASection() {
   return (
-    <Box component="section" sx={{ px: '94px', pt: '72px' }}>
+    <Box component="section" sx={{ px: '94px', pt: '72px', pb: '48px', position: 'relative', zIndex: 1 }}>
       <Box
         sx={{
           bgcolor: 'primary.main',
