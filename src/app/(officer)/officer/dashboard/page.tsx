@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -16,95 +17,24 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
+import Skeleton from '@mui/material/Skeleton'
 import SearchIcon from '@mui/icons-material/Search'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import { useLoanControllerFindLoans, useLoanControllerCountLoans } from '@/lib/api/generated/loan-controller/loan-controller'
+import { useLoanControllerGetLoanAggregatedValues } from '@/lib/api/generated/loan-controller/loan-controller'
+import { useLoanStatusControllerFindLoanStatuses } from '@/lib/api/generated/loan-status-controller/loan-status-controller'
+import { useLoanTypeControllerFindLoanTypes } from '@/lib/api/generated/loan-type-controller/loan-type-controller'
+import type { Loan } from '@/types/api/loan'
+import type { LoanStatus } from '@/types/api/loanStatus'
+import type { LoanType } from '@/types/api/loanType'
 import LoanStatusBadge from '@/components/officer/LoanStatusBadge'
 
-/* ─── Metric cards data ─── */
+/* ─── Constants ─── */
 
-interface MetricCard {
-  label: string
-  value: string
-  unit?: string
-  trend: string
-  trendColor: string
-  icon: string
-  trendIcon: string
-}
-
-const METRICS: MetricCard[] = [
-  {
-    label: 'PENDING APPLICATIONS',
-    value: '34',
-    trend: '3 since last month',
-    trendColor: '#16A41D',
-    icon: '/icons/officer/metric-pending.png',
-    trendIcon: '/icons/officer/trend-up.png',
-  },
-  {
-    label: 'PENDING APPLICATIONS VALUE',
-    value: '$3.96',
-    unit: 'million',
-    trend: '3 since last month',
-    trendColor: '#16A41D',
-    icon: '/icons/officer/metric-value.png',
-    trendIcon: '/icons/officer/trend-up-green.png',
-  },
-  {
-    label: 'APPROVED',
-    value: '123',
-    unit: 'Applications',
-    trend: '1.6 since last month',
-    trendColor: '#16A41D',
-    icon: '/icons/officer/metric-approved.png',
-    trendIcon: '/icons/officer/trend-up.png',
-  },
-  {
-    label: 'REJECTED',
-    value: '2',
-    unit: 'Applications',
-    trend: '1.6 since last month',
-    trendColor: '#16A41D',
-    icon: '/icons/officer/metric-rejected.png',
-    trendIcon: '/icons/officer/trend-up.png',
-  },
-  {
-    label: 'AWAITING DECISION',
-    value: '11',
-    trend: '6 require your action',
-    trendColor: '#FF6800',
-    icon: '/icons/officer/metric-awaiting.png',
-    trendIcon: '',
-  },
-]
-
-/* ─── Mock table data ─── */
-
-interface LoanApplication {
-  id: number
-  applicant: string
-  avatar: string
-  submittedOn: string
-  loanType: string
-  loanAmount: string
-  creditScore: number
-  stage: string
-}
-
-const MOCK_ROWS: LoanApplication[] = [
-  { id: 1, applicant: 'John Doe',  avatar: '/icons/officer/avatar-1.png', submittedOn: '25/02/2026', loanType: 'Personal', loanAmount: '$24,000', creditScore: 712, stage: 'Pending' },
-  { id: 2, applicant: 'J Draper',  avatar: '/icons/officer/avatar-2.png', submittedOn: '22/02/2026', loanType: 'Auto',     loanAmount: '$50,000', creditScore: 798, stage: 'Awaiting Decision' },
-  { id: 3, applicant: 'John Doe',  avatar: '/icons/officer/avatar-1.png', submittedOn: '25/02/2026', loanType: 'Personal', loanAmount: '$24,000', creditScore: 712, stage: 'Approved' },
-  { id: 4, applicant: 'J Draper',  avatar: '/icons/officer/avatar-2.png', submittedOn: '22/02/2026', loanType: 'Auto',     loanAmount: '$50,000', creditScore: 798, stage: 'Approved' },
-  { id: 5, applicant: 'John Doe',  avatar: '/icons/officer/avatar-1.png', submittedOn: '25/02/2026', loanType: 'Personal', loanAmount: '$24,000', creditScore: 712, stage: 'Rejected' },
-  { id: 6, applicant: 'J Draper',  avatar: '/icons/officer/avatar-2.png', submittedOn: '22/02/2026', loanType: 'Auto',     loanAmount: '$50,000', creditScore: 798, stage: 'Pending' },
-  { id: 7, applicant: 'John Doe',  avatar: '/icons/officer/avatar-1.png', submittedOn: '25/02/2026', loanType: 'Personal', loanAmount: '$24,000', creditScore: 712, stage: 'Rejected' },
-]
-
-/* ─── Shared text styles ─── */
+const PAGE_SIZE = 7
 
 const headerCellSx = {
   fontFamily: '"DM Sans", sans-serif',
@@ -126,19 +56,189 @@ const bodyCellSx = {
   py: '12px',
 }
 
-export default function OfficerDashboardPage() {
-  const [search, setSearch] = useState('')
-  const [stageFilter, setStageFilter] = useState('All Stages')
+/* ─── Helpers ─── */
 
-  const filtered = MOCK_ROWS.filter((row) => {
-    const matchSearch =
-      !search ||
-      row.applicant.toLowerCase().includes(search.toLowerCase()) ||
-      row.loanType.toLowerCase().includes(search.toLowerCase()) ||
-      row.stage.toLowerCase().includes(search.toLowerCase())
-    const matchStage = stageFilter === 'All Stages' || row.stage === stageFilter
-    return matchSearch && matchStage
+function formatCurrency(value: number | undefined): string {
+  if (value == null) return '—'
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)
+}
+
+function formatCompactCurrency(value: number | undefined): string {
+  if (value == null) return '—'
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(2)}`
+  if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`
+  return `$${value.toFixed(0)}`
+}
+
+function formatDate(dateStr: string | undefined): string {
+  if (!dateStr) return '—'
+  const d = new Date(dateStr)
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+/* ─── Metric card config ─── */
+
+interface MetricDef {
+  label: string
+  icon: string
+  trendIcon: string
+  trendColor: string
+  getValue: (counts: MetricCounts) => string
+  getUnit?: (counts: MetricCounts) => string
+  getTrend: (counts: MetricCounts) => string
+}
+
+interface MetricCounts {
+  total: number | undefined
+  pending: number | undefined
+  approved: number | undefined
+  rejected: number | undefined
+  awaiting: number | undefined
+  avgAmount: number | undefined
+}
+
+const METRIC_DEFS: MetricDef[] = [
+  {
+    label: 'PENDING APPLICATIONS',
+    icon: '/icons/officer/metric-pending.png',
+    trendIcon: '/icons/officer/trend-up.png',
+    trendColor: '#16A41D',
+    getValue: (c) => c.pending?.toString() ?? '—',
+    getTrend: () => 'since last month',
+  },
+  {
+    label: 'PENDING APPLICATIONS VALUE',
+    icon: '/icons/officer/metric-value.png',
+    trendIcon: '/icons/officer/trend-up-green.png',
+    trendColor: '#16A41D',
+    getValue: (c) => formatCompactCurrency(c.avgAmount != null && c.pending != null ? c.avgAmount * c.pending : undefined),
+    getUnit: () => 'total',
+    getTrend: () => 'since last month',
+  },
+  {
+    label: 'APPROVED',
+    icon: '/icons/officer/metric-approved.png',
+    trendIcon: '/icons/officer/trend-up.png',
+    trendColor: '#16A41D',
+    getValue: (c) => c.approved?.toString() ?? '—',
+    getUnit: () => 'Applications',
+    getTrend: () => 'since last month',
+  },
+  {
+    label: 'REJECTED',
+    icon: '/icons/officer/metric-rejected.png',
+    trendIcon: '/icons/officer/trend-up.png',
+    trendColor: '#16A41D',
+    getValue: (c) => c.rejected?.toString() ?? '—',
+    getUnit: () => 'Applications',
+    getTrend: () => 'since last month',
+  },
+  {
+    label: 'AWAITING DECISION',
+    icon: '/icons/officer/metric-awaiting.png',
+    trendIcon: '',
+    trendColor: '#FF6800',
+    getValue: (c) => c.awaiting?.toString() ?? '—',
+    getTrend: (c) => `${c.awaiting ?? 0} require your action`,
+  },
+]
+
+/* ─── Page component ─── */
+
+export default function OfficerDashboardPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const currentPage = Number(searchParams.get('page') ?? '1')
+
+  const [search, setSearch] = useState('')
+  const [stageFilter, setStageFilter] = useState('')
+  const [typeFilter, setTypeFilter] = useState('')
+
+  // ── Fetch statuses & loan types for filters ──
+  const { data: statusesPage } = useLoanStatusControllerFindLoanStatuses()
+  const statuses = (statusesPage?.content ?? []) as LoanStatus[]
+
+  const { data: loanTypesPage } = useLoanTypeControllerFindLoanTypes()
+  const loanTypes = (loanTypesPage?.content ?? []) as LoanType[]
+
+  // ── Build query filter ──
+  const queryFilter = useMemo(() => {
+    const parts: string[] = []
+    if (stageFilter) parts.push(`loanStatusId=${stageFilter}`)
+    if (typeFilter) parts.push(`loanTypeId=${typeFilter}`)
+    if (search.trim()) parts.push(`person.firstName like '%${search.trim()}%' OR person.lastName like '%${search.trim()}%'`)
+    return parts.length > 0 ? parts.join(' AND ') : undefined
+  }, [stageFilter, typeFilter, search])
+
+  // ── Fetch loan list ──
+  const { data: loansPage, isLoading: loansLoading } = useLoanControllerFindLoans({
+    page: currentPage,
+    size: PAGE_SIZE,
+    sort: 'id desc',
+    q: queryFilter,
   })
+  const loans = (loansPage?.content ?? []) as Loan[]
+  const totalElements = loansPage?.totalElements ?? 0
+  const totalPages = loansPage?.totalPages ?? 1
+
+  // ── Fetch metric counts (parallel via separate hooks) ──
+  const statusIdMap = useMemo(() => {
+    const map: Record<string, number> = {}
+    statuses.forEach((s) => { if (s.name && s.id) map[s.name] = s.id })
+    return map
+  }, [statuses])
+
+  const { data: totalCount, isLoading: totalLoading } = useLoanControllerCountLoans({})
+  const { data: pendingCount, isLoading: pendingLoading } = useLoanControllerCountLoans(
+    statusIdMap.PENDING ? { q: `loanStatusId=${statusIdMap.PENDING}` } : undefined,
+  )
+  const { data: approvedCount, isLoading: approvedLoading } = useLoanControllerCountLoans(
+    statusIdMap.APPROVED ? { q: `loanStatusId=${statusIdMap.APPROVED}` } : undefined,
+  )
+  const { data: rejectedCount, isLoading: rejectedLoading } = useLoanControllerCountLoans(
+    statusIdMap.REJECTED ? { q: `loanStatusId=${statusIdMap.REJECTED}` } : undefined,
+  )
+  const { data: awaitingCount, isLoading: awaitingLoading } = useLoanControllerCountLoans(
+    statusIdMap.AWAITING ? { q: `loanStatusId=${statusIdMap.AWAITING}` } : undefined,
+  )
+
+  // ── Aggregation for avg amount ──
+  const { mutate: fetchAgg, data: aggResult } = useLoanControllerGetLoanAggregatedValues()
+  // Trigger aggregation once statuses are loaded
+  useMemo(() => {
+    if (statuses.length > 0) {
+      fetchAgg({
+        data: {
+          aggregations: [{ field: 'principleAmount', type: 'AVG', alias: 'avgAmount' }],
+          groupByFields: [],
+        },
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statuses.length])
+
+  const avgAmount = ((aggResult as unknown as { content?: { avgAmount?: number }[] })?.content?.[0]?.avgAmount) as number | undefined
+
+  const metricsLoading = totalLoading || pendingLoading || approvedLoading || rejectedLoading || awaitingLoading
+
+  const metricCounts: MetricCounts = {
+    total: totalCount as number | undefined,
+    pending: pendingCount as number | undefined,
+    approved: approvedCount as number | undefined,
+    rejected: rejectedCount as number | undefined,
+    awaiting: awaitingCount as number | undefined,
+    avgAmount,
+  }
+
+  // ── Pagination helpers ──
+  const startRow = (currentPage - 1) * PAGE_SIZE + 1
+  const endRow = Math.min(startRow + loans.length - 1, totalElements)
+
+  const goToPage = (p: number) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('page', String(p))
+    router.push(`/officer/dashboard?${params.toString()}`)
+  }
 
   return (
     <Box sx={{ width: '100%', maxWidth: 1304 }}>
@@ -177,7 +277,7 @@ export default function OfficerDashboardPage() {
 
       {/* ─── Metrics Row ─── */}
       <Box className="flex gap-[5px]" sx={{ mb: '6px' }}>
-        {METRICS.map((metric) => (
+        {METRIC_DEFS.map((metric, idx) => (
           <Box
             key={metric.label}
             sx={{
@@ -193,7 +293,6 @@ export default function OfficerDashboardPage() {
               py: '12px',
             }}
           >
-            {/* Left: label + value + trend */}
             <Box className="flex flex-col" sx={{ gap: '13px' }}>
               <Typography
                 sx={{
@@ -210,18 +309,22 @@ export default function OfficerDashboardPage() {
               </Typography>
               <Box className="flex flex-col" sx={{ gap: '12px' }}>
                 <Box className="flex items-baseline gap-[4px]">
-                  <Typography
-                    sx={{
-                      fontFamily: '"DM Sans", sans-serif',
-                      fontWeight: 700,
-                      fontSize: '28px',
-                      lineHeight: '36px',
-                      color: '#2E2C46',
-                    }}
-                  >
-                    {metric.value}
-                  </Typography>
-                  {metric.unit && (
+                  {metricsLoading ? (
+                    <Skeleton variant="text" width={60} height={36} />
+                  ) : (
+                    <Typography
+                      sx={{
+                        fontFamily: '"DM Sans", sans-serif',
+                        fontWeight: 700,
+                        fontSize: '28px',
+                        lineHeight: '36px',
+                        color: '#2E2C46',
+                      }}
+                    >
+                      {metric.getValue(metricCounts)}
+                    </Typography>
+                  )}
+                  {metric.getUnit && !metricsLoading && (
                     <Typography
                       sx={{
                         fontFamily: '"DM Sans", sans-serif',
@@ -231,7 +334,7 @@ export default function OfficerDashboardPage() {
                         color: '#7F879E',
                       }}
                     >
-                      {metric.unit}
+                      {metric.getUnit(metricCounts)}
                     </Typography>
                   )}
                 </Box>
@@ -248,13 +351,11 @@ export default function OfficerDashboardPage() {
                       color: metric.trendColor,
                     }}
                   >
-                    {metric.trend}
+                    {metric.getTrend(metricCounts)}
                   </Typography>
                 </Box>
               </Box>
             </Box>
-
-            {/* Right: icon */}
             <Image src={metric.icon} alt="" width={24} height={24} />
           </Box>
         ))}
@@ -297,27 +398,57 @@ export default function OfficerDashboardPage() {
               },
             }}
           />
-          <Select
-            value={stageFilter}
-            onChange={(e) => setStageFilter(e.target.value)}
-            size="small"
-            IconComponent={KeyboardArrowDownIcon}
-            sx={{
-              width: 138,
-              height: 40,
-              borderRadius: '8px',
-              fontFamily: '"DM Sans", sans-serif',
-              fontSize: '14px',
-              color: '#2E2C46',
-              '& fieldset': { borderColor: '#E5E5EC' },
-            }}
-          >
-            <MenuItem value="All Stages">All Stages</MenuItem>
-            <MenuItem value="Pending">Pending</MenuItem>
-            <MenuItem value="Awaiting Decision">Awaiting Decision</MenuItem>
-            <MenuItem value="Approved">Approved</MenuItem>
-            <MenuItem value="Rejected">Rejected</MenuItem>
-          </Select>
+          <Box className="flex items-center gap-[12px]">
+            {/* Loan Type filter */}
+            <Select
+              value={typeFilter}
+              onChange={(e) => { setTypeFilter(e.target.value); goToPage(0) }}
+              displayEmpty
+              size="small"
+              IconComponent={KeyboardArrowDownIcon}
+              sx={{
+                width: 138,
+                height: 40,
+                borderRadius: '8px',
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: '14px',
+                color: '#2E2C46',
+                '& fieldset': { borderColor: '#E5E5EC' },
+              }}
+            >
+              <MenuItem value="">All Types</MenuItem>
+              {loanTypes.map((lt) => (
+                <MenuItem key={lt.id} value={String(lt.id)}>
+                  {lt.displayName}
+                </MenuItem>
+              ))}
+            </Select>
+
+            {/* Stage filter */}
+            <Select
+              value={stageFilter}
+              onChange={(e) => { setStageFilter(e.target.value); goToPage(0) }}
+              displayEmpty
+              size="small"
+              IconComponent={KeyboardArrowDownIcon}
+              sx={{
+                width: 138,
+                height: 40,
+                borderRadius: '8px',
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: '14px',
+                color: '#2E2C46',
+                '& fieldset': { borderColor: '#E5E5EC' },
+              }}
+            >
+              <MenuItem value="">All Stages</MenuItem>
+              {statuses.map((s) => (
+                <MenuItem key={s.id} value={String(s.id)}>
+                  {s.displayName}
+                </MenuItem>
+              ))}
+            </Select>
+          </Box>
         </Box>
 
         {/* Table */}
@@ -335,43 +466,98 @@ export default function OfficerDashboardPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filtered.map((row) => (
-                <TableRow key={row.id} sx={{ '&:hover': { bgcolor: '#FAFAFB' } }}>
-                  <TableCell sx={{ ...bodyCellSx, pl: '30px' }}>
-                    <Box className="flex items-center gap-[12px]">
-                      <Image
-                        src={row.avatar}
-                        alt={row.applicant}
-                        width={36}
-                        height={36}
-                        style={{ borderRadius: '50%', objectFit: 'cover' }}
-                      />
-                      <Typography
-                        sx={{
-                          fontFamily: '"DM Sans", sans-serif',
-                          fontWeight: 500,
-                          fontSize: '14px',
-                          color: '#2E2C46',
-                        }}
-                      >
-                        {row.applicant}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={bodyCellSx}>{row.submittedOn}</TableCell>
-                  <TableCell sx={{ ...bodyCellSx, fontWeight: 500 }}>{row.loanType}</TableCell>
-                  <TableCell sx={{ ...bodyCellSx, fontWeight: 600 }}>{row.loanAmount}</TableCell>
-                  <TableCell sx={bodyCellSx}>{row.creditScore}</TableCell>
-                  <TableCell sx={bodyCellSx}>
-                    <LoanStatusBadge status={row.stage} />
-                  </TableCell>
-                  <TableCell sx={{ ...bodyCellSx, pr: '30px' }}>
-                    <IconButton size="small" sx={{ color: '#7F879E' }}>
-                      <MoreVertIcon sx={{ fontSize: 20 }} />
-                    </IconButton>
+              {loansLoading ? (
+                // Skeleton rows
+                Array.from({ length: PAGE_SIZE }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell sx={{ ...bodyCellSx, pl: '30px' }}>
+                      <Box className="flex items-center gap-[12px]">
+                        <Skeleton variant="circular" width={36} height={36} />
+                        <Skeleton variant="text" width={80} />
+                      </Box>
+                    </TableCell>
+                    <TableCell sx={bodyCellSx}><Skeleton variant="text" width={80} /></TableCell>
+                    <TableCell sx={bodyCellSx}><Skeleton variant="text" width={60} /></TableCell>
+                    <TableCell sx={bodyCellSx}><Skeleton variant="text" width={70} /></TableCell>
+                    <TableCell sx={bodyCellSx}><Skeleton variant="text" width={40} /></TableCell>
+                    <TableCell sx={bodyCellSx}><Skeleton variant="rounded" width={90} height={24} sx={{ borderRadius: '1000px' }} /></TableCell>
+                    <TableCell sx={{ ...bodyCellSx, pr: '30px' }}><Skeleton variant="circular" width={20} height={20} /></TableCell>
+                  </TableRow>
+                ))
+              ) : loans.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} sx={{ textAlign: 'center', py: '60px' }}>
+                    <Typography
+                      sx={{
+                        fontFamily: '"DM Sans", sans-serif',
+                        fontWeight: 500,
+                        fontSize: '14px',
+                        color: '#7F879E',
+                      }}
+                    >
+                      No loan applications found
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                loans.map((loan) => {
+                  const name = [loan.person?.firstName, loan.person?.lastName].filter(Boolean).join(' ') || loan.personEmail || '—'
+                  return (
+                    <TableRow key={loan.id} sx={{ '&:hover': { bgcolor: '#FAFAFB' } }}>
+                      <TableCell sx={{ ...bodyCellSx, pl: '30px' }}>
+                        <Box className="flex items-center gap-[12px]">
+                          <Box
+                            sx={{
+                              width: 36,
+                              height: 36,
+                              borderRadius: '50%',
+                              bgcolor: '#474DDD',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0,
+                            }}
+                          >
+                            <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: '14px', color: 'white' }}>
+                              {name.charAt(0).toUpperCase()}
+                            </Typography>
+                          </Box>
+                          <Typography
+                            sx={{
+                              fontFamily: '"DM Sans", sans-serif',
+                              fontWeight: 500,
+                              fontSize: '14px',
+                              color: '#2E2C46',
+                            }}
+                          >
+                            {name}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell sx={bodyCellSx}>{formatDate(loan.startDate)}</TableCell>
+                      <TableCell sx={{ ...bodyCellSx, fontWeight: 500 }}>{loan.loanType?.displayName ?? '—'}</TableCell>
+                      <TableCell sx={{ ...bodyCellSx, fontWeight: 600 }}>{formatCurrency(loan.principleAmount)}</TableCell>
+                      <TableCell sx={bodyCellSx}>—</TableCell>
+                      <TableCell sx={bodyCellSx}>
+                        <LoanStatusBadge status={loan.loanStatus?.displayName ?? 'Pending'} />
+                      </TableCell>
+                      <TableCell sx={{ ...bodyCellSx, pr: '30px' }}>
+                        <IconButton
+                          size="small"
+                          sx={{ color: '#7F879E' }}
+                          onClick={() =>
+                            router.push(
+                              `/officer/customers/${encodeURIComponent(loan.personEmail ?? '')}?loanId=${loan.id}`
+                            )
+                          }
+                        >
+                          <MoreVertIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -393,7 +579,7 @@ export default function OfficerDashboardPage() {
               color: '#7F879E',
             }}
           >
-            1–{String(filtered.length).padStart(2, '0')} of 97
+            {totalElements > 0 ? `${startRow}–${String(endRow).padStart(2, '0')} of ${totalElements}` : 'No results'}
           </Typography>
           <Box className="flex items-center gap-[8px]">
             <Typography
@@ -404,9 +590,14 @@ export default function OfficerDashboardPage() {
                 color: '#7F879E',
               }}
             >
-              Rows per page: {String(filtered.length).padStart(2, '0')}
+              Rows per page: {String(PAGE_SIZE).padStart(2, '0')}
             </Typography>
-            <IconButton size="small" disabled sx={{ color: '#7F879E' }}>
+            <IconButton
+              size="small"
+              disabled={currentPage <= 1}
+              onClick={() => goToPage(currentPage - 1)}
+              sx={{ color: '#7F879E' }}
+            >
               <ChevronLeftIcon sx={{ fontSize: 18 }} />
             </IconButton>
             <Typography
@@ -417,9 +608,14 @@ export default function OfficerDashboardPage() {
                 color: '#2E2C46',
               }}
             >
-              1/12
+              {currentPage + 1}/{totalPages}
             </Typography>
-            <IconButton size="small" sx={{ color: '#7F879E' }}>
+            <IconButton
+              size="small"
+              disabled={currentPage >= totalPages - 1}
+              onClick={() => goToPage(currentPage + 1)}
+              sx={{ color: '#7F879E' }}
+            >
               <ChevronRightIcon sx={{ fontSize: 18 }} />
             </IconButton>
           </Box>

@@ -3,22 +3,23 @@
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 
-type StatusVariant = 'Pending' | 'Awaiting Decision' | 'Approved' | 'Rejected'
-
-const STATUS_STYLES: Record<StatusVariant, { bgcolor: string; color: string }> = {
-  Pending:            { bgcolor: '#E8EAF6', color: '#474DDD' },
-  'Awaiting Decision': { bgcolor: '#FFF3E0', color: '#E65100' },
-  Approved:           { bgcolor: '#16A41D', color: '#FFFFFF' },
-  Rejected:           { bgcolor: '#BA1A1A', color: '#FFFFFF' },
+/* Styles keyed by LoanStatus.displayName from GET /loancorp/LoanStatus */
+const STATUS_STYLES: Record<string, { bgcolor: string; color: string }> = {
+  Pending:        { bgcolor: '#E8EAF6', color: '#474DDD' },
+  Awaiting:       { bgcolor: '#FFF3E0', color: '#E65100' },
+  'In-Progress':  { bgcolor: '#E3F2FD', color: '#1565C0' },
+  Approved:       { bgcolor: '#16A41D', color: '#FFFFFF' },
+  Rejected:       { bgcolor: '#BA1A1A', color: '#FFFFFF' },
 }
+
+const DEFAULT_STYLE = { bgcolor: '#E8EAF6', color: '#474DDD' }
 
 interface Props {
   status: string
 }
 
 export default function LoanStatusBadge({ status }: Props) {
-  const variant = status as StatusVariant
-  const style = STATUS_STYLES[variant] ?? STATUS_STYLES.Pending
+  const style = STATUS_STYLES[status] ?? DEFAULT_STYLE
 
   return (
     <Box
