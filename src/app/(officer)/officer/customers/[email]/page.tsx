@@ -1,7 +1,8 @@
 'use client'
 
-import { use, useMemo } from 'react'
+import { use, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import Image from 'next/image'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -22,6 +23,10 @@ import type { Person } from '@/types/api/person'
 import type { Loan } from '@/types/api/loan'
 import type { LoanEmi } from '@/types/api/loanEmi'
 import LoanStatusBadge from '@/components/officer/LoanStatusBadge'
+import ApproveLoanDialog from '@/components/officer/ApproveLoanDialog'
+import RejectLoanDialog from '@/components/officer/RejectLoanDialog'
+import ApplicationApprovedDialog from '@/components/officer/ApplicationApprovedDialog'
+import ApplicationRejectedDialog from '@/components/officer/ApplicationRejectedDialog'
 
 /* ─── Helpers ─── */
 
@@ -89,7 +94,14 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ email
   const decodedEmail = decodeURIComponent(email)
   const router = useRouter()
   const searchParams = useSearchParams()
+  const queryClient = useQueryClient()
   const selectedLoanId = searchParams.get('loanId')
+
+  // Dialog state
+  const [approveOpen, setApproveOpen] = useState(false)
+  const [rejectOpen, setRejectOpen] = useState(false)
+  const [approvedLoan, setApprovedLoan] = useState<Loan | null>(null)
+  const [rejectedLoan, setRejectedLoan] = useState<Loan | null>(null)
 
   // ── STEP 1: Fetch person ──
   const { data: personPage, isLoading: personLoading } = usePersonControllerFindPersons(
@@ -340,10 +352,10 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ email
                 {canAction && (
                   <Box className="flex items-center justify-end gap-[12px]" sx={{ pt: '16px', borderTop: '1px solid #F0F0F0', mt: '12px' }}>
                     <Image src="/icons/common/ai-assist.png" alt="AI" width={34} height={34} style={{ marginRight: 'auto' }} />
-                    <Button variant="outlined" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 500, fontSize: '14px', color: '#E32E34', borderColor: '#E32E34', textTransform: 'none', borderRadius: '8px', height: 40, width: 90, borderWidth: 1, '&:hover': { borderColor: '#E32E34', bgcolor: 'rgba(227,46,52,0.04)', borderWidth: 1 } }}>
+                    <Button onClick={() => setRejectOpen(true)} variant="outlined" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 500, fontSize: '14px', color: '#E32E34', borderColor: '#E32E34', textTransform: 'none', borderRadius: '8px', height: 40, width: 90, borderWidth: 1, '&:hover': { borderColor: '#E32E34', bgcolor: 'rgba(227,46,52,0.04)', borderWidth: 1 } }}>
                       Reject
                     </Button>
-                    <Button variant="contained" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 500, fontSize: '14px', bgcolor: '#474DDD', color: 'white', textTransform: 'none', borderRadius: '8px', height: 40, width: 105, boxShadow: 'none', '&:hover': { boxShadow: 'none', bgcolor: '#3B41C4' } }}>
+                    <Button onClick={() => setApproveOpen(true)} variant="contained" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 500, fontSize: '14px', bgcolor: '#474DDD', color: 'white', textTransform: 'none', borderRadius: '8px', height: 40, width: 105, boxShadow: 'none', '&:hover': { boxShadow: 'none', bgcolor: '#3B41C4' } }}>
                       Approve
                     </Button>
                   </Box>
@@ -439,6 +451,44 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ email
           )}
         </Box>
       </Box>
+
+      {/* ─── Dialogs ─── */}
+      {displayLoan && (
+        <>
+          <ApproveLoanDialog
+            open={approveOpen}
+            loan={displayLoan}
+            onClose={() => setApproveOpen(false)}
+            onApproveSuccess={(updatedLoan) => {
+              setApproveOpen(false)
+              setApprovedLoan(updatedLoan)
+              queryClient.invalidateQueries({ queryKey: [`/loancorp/Loan/${displayLoan.id}`] })
+              queryClient.invalidateQueries({ queryKey: [`/loancorp/Person/${decodedEmail}/loans`] })
+            }}
+          />
+          <RejectLoanDialog
+            open={rejectOpen}
+            loan={displayLoan}
+            onClose={() => setRejectOpen(false)}
+            onRejectSuccess={(updatedLoan) => {
+              setRejectOpen(false)
+              setRejectedLoan(updatedLoan)
+              queryClient.invalidateQueries({ queryKey: [`/loancorp/Loan/${displayLoan.id}`] })
+              queryClient.invalidateQueries({ queryKey: [`/loancorp/Person/${decodedEmail}/loans`] })
+            }}
+          />
+          <ApplicationApprovedDialog
+            open={!!approvedLoan}
+            loan={approvedLoan}
+            onClose={() => setApprovedLoan(null)}
+          />
+          <ApplicationRejectedDialog
+            open={!!rejectedLoan}
+            loan={rejectedLoan}
+            onClose={() => setRejectedLoan(null)}
+          />
+        </>
+      )}
     </Box>
   )
 }
