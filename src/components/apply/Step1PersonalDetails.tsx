@@ -93,24 +93,24 @@ export default function Step1PersonalDetails({ onDataChange }: Props) {
 
   return (
     <Box className="flex flex-col gap-[44px]" sx={{ width: '100%' }}>
-      <Box className="flex gap-[32px] items-center justify-center" sx={{ width: '100%' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: '32px', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
         <TextField fullWidth placeholder="First Name" defaultValue={person?.firstName ?? ''} variant="outlined" sx={{ flex: 1, ...fieldSx }} />
         <TextField fullWidth placeholder="Last Name" defaultValue={person?.lastName ?? ''} variant="outlined" sx={{ flex: 1, ...fieldSx }} />
       </Box>
 
-      <Box className="flex gap-[32px] items-start justify-center" sx={{ width: '100%' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: '32px', alignItems: 'flex-start', justifyContent: 'center', width: '100%' }}>
         <TextField fullWidth placeholder="Date of birth" type="date" defaultValue={person?.dob ?? ''} variant="outlined" helperText="You must be 18 years or older" InputLabelProps={{ shrink: true }} sx={{ flex: 1, ...fieldSx, '& .MuiFormHelperText-root': helperSx }} />
         <TextField fullWidth placeholder="Social Security Number" defaultValue={person?.socialSecurityNumber ?? ''} variant="outlined" sx={{ flex: 1, ...fieldSx }} />
       </Box>
 
-      <Box className="flex gap-[32px] items-start justify-center" sx={{ width: '100%' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: '32px', alignItems: 'flex-start', justifyContent: 'center', width: '100%' }}>
         <TextField fullWidth placeholder="Email address" type="email" defaultValue={person?.email ?? ''} variant="outlined" InputProps={{ readOnly: !!person?.email }} sx={{ flex: 1, ...fieldSx }} />
         <TextField fullWidth placeholder="Mobile number" type="tel" defaultValue={person?.phoneNumber ?? ''} variant="outlined" helperText="We will use this to contact you" sx={{ flex: 1, ...fieldSx, '& .MuiFormHelperText-root': helperSx }} />
       </Box>
 
-      <Box className="flex gap-[32px] items-center justify-center" sx={{ width: '100%' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: '32px', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
         <TextField fullWidth placeholder="Address" defaultValue={addr.street} variant="outlined" sx={{ flex: 1, ...fieldSx }} />
-        <Box className="flex gap-[20px] items-center" sx={{ width: 400, flexShrink: 0 }}>
+        <Box sx={{ display: 'flex', gap: '20px', alignItems: 'center', width: { xs: '100%', sm: 400 }, flexShrink: 0 }}>
           <TextField fullWidth placeholder="Area Code" defaultValue={addr.areaCode} variant="outlined" sx={{ flex: 1, ...fieldSx }} />
           <TextField
             fullWidth select defaultValue={addr.state || ''} variant="outlined"

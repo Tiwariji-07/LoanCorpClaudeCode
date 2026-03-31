@@ -125,7 +125,7 @@ export default function ApplyPage() {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        width: '100vw',
+        width: '100%',
         height: '100vh',
         bgcolor: 'white',
         overflow: 'hidden',
@@ -146,16 +146,18 @@ export default function ApplyPage() {
           zIndex: 1,
         }}
       >
-        <Box className="flex items-center gap-[12px]">
+        <Box className="flex items-center gap-[12px]" sx={{ minWidth: 0 }}>
           <Image src="/icons/common/wizard-logo.png" alt="Home" width={44} height={44} />
           <Typography
             sx={{
               fontFamily: '"DM Sans", sans-serif',
               fontWeight: 700,
-              fontSize: '18px',
+              fontSize: { xs: '14px', md: '18px' },
               lineHeight: '24px',
               letterSpacing: '0.15px',
               color: '#2E2C46',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
             }}
           >
@@ -183,10 +185,11 @@ export default function ApplyPage() {
       </Box>
 
       {/* Body */}
-      <Box sx={{ display: 'flex', flex: 1, minHeight: 0 }}>
-        {/* Left sidebar stepper */}
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, flex: 1, minHeight: 0 }}>
+        {/* Left sidebar stepper — hidden on mobile, shown as horizontal strip */}
         <Box
           sx={{
+            display: { xs: 'none', md: 'block' },
             width: 409,
             flexShrink: 0,
             bgcolor: '#F8F9FD',
@@ -199,14 +202,41 @@ export default function ApplyPage() {
           <Stepper steps={STEPS} activeStep={activeStep} />
         </Box>
 
+        {/* Mobile stepper indicator */}
+        <Box
+          sx={{
+            display: { xs: 'flex', md: 'none' },
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            py: '12px',
+            px: '16px',
+            bgcolor: '#F8F9FD',
+            flexShrink: 0,
+          }}
+        >
+          {STEPS.map((step, i) => (
+            <Box
+              key={step}
+              sx={{
+                flex: 1,
+                height: 4,
+                borderRadius: '2px',
+                bgcolor: i <= activeStep ? '#474DDD' : '#E5E5EC',
+                transition: 'background-color 0.3s',
+              }}
+            />
+          ))}
+        </Box>
+
         {/* Right content */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0 }}>
           <Box
             sx={{
               flex: 1,
               overflowY: 'auto',
-              pt: '44px',
-              px: '100px',
+              pt: { xs: '24px', md: '44px' },
+              px: { xs: '16px', sm: '32px', md: '100px' },
               pb: '24px',
               display: 'flex',
               flexDirection: 'column',
@@ -235,12 +265,14 @@ export default function ApplyPage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'flex-end',
-              height: 90,
-              px: '100px',
+              flexWrap: 'wrap',
+              height: { xs: 'auto', md: 90 },
+              px: { xs: '16px', sm: '32px', md: '100px' },
+              py: { xs: '12px', md: 0 },
               borderTop: '1px solid',
               borderColor: '#E5E5EC',
               flexShrink: 0,
-              gap: '20px',
+              gap: { xs: '12px', md: '20px' },
             }}
           >
             {activeStep > 0 && (

@@ -135,13 +135,15 @@ export default function Step3LoanDetails({ onDataChange }: Props) {
       <Box
         sx={{
           display: 'flex',
-          alignItems: 'center',
-          gap: '60px',
-          height: 100,
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          gap: { xs: '16px', sm: '60px' },
+          height: { xs: 'auto', sm: 100 },
           border: '1px solid',
           borderColor: '#E5E5EC',
           borderRadius: '12px',
           px: '24px',
+          py: { xs: '16px', sm: 0 },
         }}
       >
         <TextField
@@ -150,7 +152,7 @@ export default function Step3LoanDetails({ onDataChange }: Props) {
           onChange={(e) => setCategory(e.target.value)}
           variant="outlined"
           disabled={loanTypesLoading}
-          sx={{ width: 346, ...fieldSx }}
+          sx={{ width: { xs: '100%', sm: 346 }, ...fieldSx }}
           slotProps={{
             input: {
               endAdornment: loanTypesLoading ? (
@@ -202,7 +204,7 @@ export default function Step3LoanDetails({ onDataChange }: Props) {
       </Box>
 
       {/* Slider cards row */}
-      <Box className="flex gap-[24px] items-center justify-center" sx={{ width: '100%' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: '24px', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
         {/* Loan Amount slider */}
         <SliderCard
           label="Loan Amount"
@@ -257,9 +259,11 @@ export default function Step3LoanDetails({ onDataChange }: Props) {
         >
           {/* Cost fields row */}
           <Box
-            className="flex items-start"
             sx={{
-              gap: '60px',
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'flex-start',
+              gap: { xs: '16px', md: '60px' },
               pb: '20px',
               borderBottom: '1px dashed',
               borderColor: '#E5E5EC',
@@ -273,7 +277,7 @@ export default function Step3LoanDetails({ onDataChange }: Props) {
               { label: 'Monthly EMI', value: formatCurrency(cost.monthlyEmi) },
               { label: 'Avg. yearly cost', value: formatCurrency(cost.avgYearlyCost) },
             ].map((f) => (
-              <Box key={f.label} className="flex flex-col gap-[4px]" sx={{ flex: 1 }}>
+              <Box key={f.label} className="flex flex-col gap-[4px]" sx={{ flex: { xs: 'none', md: 1 }, width: { xs: 'calc(50% - 8px)', md: 'auto' }, minWidth: { xs: 0, md: 'auto' } }}>
                 <Typography
                   sx={{
                     fontFamily: '"DM Sans", sans-serif',
@@ -325,7 +329,7 @@ export default function Step3LoanDetails({ onDataChange }: Props) {
             </Box>
 
             {/* Legend */}
-            <Box className="flex gap-[20px] items-center justify-end" sx={{ mt: '8px' }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: '12px', md: '20px' }, alignItems: 'center', justifyContent: 'flex-end', mt: '8px' }}>
               {[
                 { color: '#FF6800', label: `Principal - ${cost.principalPct}%` },
                 { color: '#474DDD', label: `Interest paid over tenure - ${cost.interestPct}%` },
@@ -380,14 +384,16 @@ function SliderCard({
   return (
     <Box
       sx={{
-        flex: 1,
-        height: 193,
+        flex: { xs: 'none', md: 1 },
+        width: { xs: '100%', md: 'auto' },
+        height: { xs: 'auto', md: 193 },
         display: 'flex',
         flexDirection: 'column',
         gap: '28px',
         alignItems: 'center',
         justifyContent: 'center',
-        px: '36px',
+        px: { xs: '20px', md: '36px' },
+        py: { xs: '20px', md: 0 },
         border: '1px solid',
         borderColor: '#E5E5EC',
         borderRadius: '12px',

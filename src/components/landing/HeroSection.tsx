@@ -21,7 +21,7 @@ export default function HeroSection() {
       {/* Hero content — Figma px: 282px horizontal, no top gap above social proof */}
       <Box
         className="flex flex-col items-center"
-        sx={{ position: 'relative', zIndex: 1, px: '282px' }}
+        sx={{ position: 'relative', zIndex: 1, px: { xs: '20px', sm: '40px', md: '100px', lg: '282px' } }}
       >
         {/* Social proof badge */}
         <Box className="flex items-center justify-center gap-[10px]" sx={{ pt: '24px', mb: '24px' }}>
@@ -40,19 +40,27 @@ export default function HeroSection() {
         </Box>
 
         {/* Main Heading — Figma: 60px Bold, -0.25 tracking, 78px line-height */}
-        <Box className="flex flex-col items-center" sx={{ height: 178, justifyContent: 'center', mb: '12px', width: '100%' }}>
-          <Box className="flex items-center justify-between" sx={{ width: '100%' }}>
+        <Box className="flex flex-col items-center" sx={{ height: { xs: 'auto', md: 178 }, justifyContent: 'center', mb: '12px', width: '100%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+              width: '100%',
+              gap: { xs: '8px', md: 0 },
+            }}
+          >
             <Typography
               component="span"
               sx={{
                 fontFamily: '"DM Sans", sans-serif',
                 fontWeight: 700,
-                fontSize: '60px',
-                lineHeight: '78px',
+                fontSize: { xs: '32px', sm: '44px', md: '60px' },
+                lineHeight: { xs: '40px', sm: '54px', md: '78px' },
                 letterSpacing: '-0.25px',
                 color: 'text.primary',
                 textAlign: 'center',
-                whiteSpace: 'nowrap',
               }}
             >
               Simplifying Smart
@@ -63,12 +71,12 @@ export default function HeroSection() {
               sx={{
                 fontFamily: '"DM Sans", sans-serif',
                 fontWeight: 700,
-                fontSize: '60px',
-                lineHeight: '78px',
+                fontSize: { xs: '32px', sm: '44px', md: '60px' },
+                lineHeight: { xs: '40px', sm: '54px', md: '78px' },
                 letterSpacing: '-0.25px',
                 color: 'text.primary',
                 textAlign: 'center',
-                flex: 1,
+                flex: { xs: 'none', md: 1 },
               }}
             >
               Financing
@@ -78,8 +86,8 @@ export default function HeroSection() {
             sx={{
               fontFamily: '"DM Sans", sans-serif',
               fontWeight: 700,
-              fontSize: '60px',
-              lineHeight: '78px',
+              fontSize: { xs: '32px', sm: '44px', md: '60px' },
+              lineHeight: { xs: '40px', sm: '54px', md: '78px' },
               letterSpacing: '-0.25px',
               color: 'text.primary',
               textAlign: 'center',
@@ -99,8 +107,8 @@ export default function HeroSection() {
             lineHeight: '20px',
             color: '#7F879E',
             textAlign: 'center',
-            width: 574,
-            height: 40,
+            width: { xs: '100%', md: 574 },
+            height: 'auto',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

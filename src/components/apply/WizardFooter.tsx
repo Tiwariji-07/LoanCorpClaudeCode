@@ -31,7 +31,7 @@ export default function WizardFooter({
         alignItems: 'center',
         justifyContent: onBack ? 'space-between' : 'flex-end',
         height: 90,
-        px: 25,
+        px: { xs: 2, sm: 4, md: 25 },
         borderTop: '1px solid',
         borderColor: 'divider',
         width: '100%',

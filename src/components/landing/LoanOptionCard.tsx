@@ -35,7 +35,7 @@ export default function LoanOptionCard({
         display: 'flex',
         flexDirection: 'column',
         gap: 4,
-        width: 260,
+        width: { xs: '100%', md: 260 },
         flexShrink: 0,
         transition: 'transform 0.2s',
         '&:hover': { transform: 'translateY(-2px)' },

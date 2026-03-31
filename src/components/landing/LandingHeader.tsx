@@ -46,7 +46,7 @@ export default function LandingHeader({
       }}
     >
       {/* Logo + nav links */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 3, md: 8 } }}>
         {/* Logo placeholder */}
         <Box
           sx={{
@@ -72,7 +72,7 @@ export default function LandingHeader({
         </Box>
 
         {/* Nav links */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 6 }}>
           {navLinks.map((link) => (
             <Typography
               key={link.label}

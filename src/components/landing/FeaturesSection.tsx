@@ -53,10 +53,10 @@ export default function FeaturesSection() {
     <Box
       component="section"
       className="flex flex-col items-center"
-      sx={{ px: '94px', position: 'relative', zIndex: 1 }}
+      sx={{ px: { xs: '20px', sm: '40px', md: '94px' }, position: 'relative', zIndex: 1 }}
     >
       {/* Section header */}
-      <Box className="flex flex-col items-center gap-[8px]" sx={{ pt: '72px', mb: 0, px: '206px', width: '100%' }}>
+      <Box className="flex flex-col items-center gap-[8px]" sx={{ pt: '72px', mb: 0, px: { xs: 0, md: '100px', lg: '206px' }, width: '100%' }}>
         <Box className="flex items-center justify-center gap-[4px]">
           <Typography
             sx={{
@@ -77,8 +77,8 @@ export default function FeaturesSection() {
           sx={{
             fontFamily: '"DM Sans", sans-serif',
             fontWeight: 700,
-            fontSize: '36px',
-            lineHeight: '44px',
+            fontSize: { xs: '24px', md: '36px' },
+            lineHeight: { xs: '32px', md: '44px' },
             color: 'text.primary',
             textTransform: 'capitalize',
             textAlign: 'center',
@@ -90,15 +90,24 @@ export default function FeaturesSection() {
 
       {/* Loan option cards */}
       <Box
-        className="flex items-center justify-center gap-[32px]"
-        sx={{ width: '100%', height: 609, alignItems: 'center' }}
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '32px',
+          width: '100%',
+          height: { xs: 'auto', md: 609 },
+          py: { xs: '32px', md: 0 },
+        }}
       >
         {LOAN_OPTIONS.map((option) => (
           <Box
             key={option.title}
             sx={{
-              flex: 1,
-              height: 351,
+              flex: { xs: 'none', md: 1 },
+              width: { xs: '100%', md: 'auto' },
+              height: { xs: 'auto', md: 351 },
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',

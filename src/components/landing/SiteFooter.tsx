@@ -29,12 +29,12 @@ export default function SiteFooter({ brandDescription, linkGroups }: SiteFooterP
         flexDirection: 'column',
         gap: 6,
         py: 6,
-        px: '94px',
+        px: { xs: '20px', sm: '40px', md: '94px' },
         width: '100%',
       }}
     >
       {/* Top row: brand + link groups */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', gap: { xs: 4, md: 0 } }}>
         {/* Brand */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 496 }}>
           {/* Logo placeholder */}
@@ -74,7 +74,7 @@ export default function SiteFooter({ brandDescription, linkGroups }: SiteFooterP
         </Box>
 
         {/* Link groups */}
-        <Box sx={{ display: 'flex', gap: '55px' }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: '32px', md: '55px' } }}>
           {linkGroups.map((group) => (
             <Box key={group.title} sx={{ display: 'flex', flexDirection: 'column', gap: '44px' }}>
               <Typography
@@ -119,7 +119,7 @@ export default function SiteFooter({ brandDescription, linkGroups }: SiteFooterP
 
       {/* Bottom divider + socials placeholder */}
       <Divider sx={{ borderColor: 'divider' }} />
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: { xs: 2, sm: 0 } }}>
         <Typography
           sx={{
             fontFamily: '"DM Sans", sans-serif',

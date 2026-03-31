@@ -6,28 +6,31 @@ import Button from '@mui/material/Button'
 
 export default function CTASection() {
   return (
-    <Box component="section" sx={{ px: '94px', pt: '72px', pb: '48px', position: 'relative', zIndex: 1 }}>
+    <Box component="section" sx={{ px: { xs: '20px', sm: '40px', md: '94px' }, pt: '72px', pb: '48px', position: 'relative', zIndex: 1 }}>
       <Box
         sx={{
           bgcolor: 'primary.main',
           borderRadius: '8px',
-          height: 160,
+          height: { xs: 'auto', md: 160 },
           display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
           alignItems: 'center',
           justifyContent: 'space-between',
-          px: '72px',
+          px: { xs: '24px', md: '72px' },
+          py: { xs: '32px', md: 0 },
+          gap: { xs: '24px', md: 0 },
         }}
       >
-        {/* Figma: DM Sans Bold, 36px, line-height 44px, white, capitalize, max-width 539px */}
         <Typography
           sx={{
             fontFamily: '"DM Sans", sans-serif',
             fontWeight: 700,
-            fontSize: '36px',
-            lineHeight: '44px',
+            fontSize: { xs: '24px', md: '36px' },
+            lineHeight: { xs: '32px', md: '44px' },
             color: 'white',
             textTransform: 'capitalize',
-            maxWidth: 539,
+            maxWidth: { xs: '100%', md: 539 },
+            textAlign: { xs: 'center', md: 'left' },
           }}
         >
           Stuck Somewhere? Our Team Is Ready To Assist You.

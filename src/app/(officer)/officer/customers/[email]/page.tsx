@@ -156,8 +156,8 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ email
   return (
     <Box sx={{ width: '100%', maxWidth: 1304 }}>
       {/* Title row */}
-      <Box className="flex items-center justify-between" sx={{ mb: '24px' }}>
-        <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: '36px', lineHeight: '44px', color: '#2E2C46' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: { xs: '12px', sm: 0 }, mb: '24px' }}>
+        <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: { xs: '28px', md: '36px' }, lineHeight: { xs: '36px', md: '44px' }, color: '#2E2C46' }}>
           Customer Details
         </Typography>
         <Button variant="contained" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 500, fontSize: '14px', letterSpacing: '0.1px', bgcolor: '#474DDD', color: 'white', textTransform: 'none', borderRadius: '8px', height: 34, boxShadow: 'none', '&:hover': { boxShadow: 'none', bgcolor: '#3B41C4' } }}>
@@ -166,9 +166,9 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ email
       </Box>
 
       {/* Two-column layout */}
-      <Box className="flex gap-[5px]" sx={{ width: '100%' }}>
-        {/* ─── LEFT PANEL (840px) ─── */}
-        <Box className="flex flex-col" sx={{ width: 840, gap: '5px' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, gap: '5px', width: '100%' }}>
+        {/* ─── LEFT PANEL ─── */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', width: { xs: '100%', lg: 840 }, gap: '5px' }}>
 
           {/* ── Profile + Personal Info (single card) ── */}
           <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '1px solid #F0F0F0' }}>
@@ -183,7 +183,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ email
             ) : (
               <>
                 {/* Profile header */}
-                <Box className="flex items-center justify-between" sx={{ px: '20px', py: '16px' }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', px: '20px', py: '16px' }}>
                   <Box className="flex items-center gap-[12px]">
                     <Image src="/icons/officer/avatar-1.png" alt="" width={40} height={40} style={{ borderRadius: '50%', objectFit: 'cover' }} />
                     <Box>
@@ -209,18 +209,18 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ email
 
                 {/* Personal info fields */}
                 <Box sx={{ mx: '20px', mb: '20px', bgcolor: '#F8F9FD', borderRadius: '8px', px: '20px', py: '20px' }}>
-                  <Box className="flex" sx={{ gap: '32px', mb: '28px' }}>
-                    <InfoField label="D.O.B" value={formatDate(person?.dob)} width={109} />
-                    <InfoField label="Phone" value={person?.phoneNumber ?? '—'} width={101} />
-                    <InfoField label="Email" value={person?.email ?? '—'} width={157} />
-                    <InfoField label="Social Security No." value={formatSSN(person?.socialSecurityNumber)} width={106} />
-                    <InfoField label="Job title" value="—" width={151} />
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: '16px', md: '32px' }, mb: '28px' }}>
+                    <InfoField label="D.O.B" value={formatDate(person?.dob)} />
+                    <InfoField label="Phone" value={person?.phoneNumber ?? '—'} />
+                    <InfoField label="Email" value={person?.email ?? '—'} />
+                    <InfoField label="Social Security No." value={formatSSN(person?.socialSecurityNumber)} />
+                    <InfoField label="Job title" value="—" />
                   </Box>
-                  <Box className="flex" sx={{ gap: '32px' }}>
-                    <InfoField label="Employer" value="—" width={105} />
-                    <InfoField label="Employment type" value="—" width={101} />
-                    <InfoField label="Years with employer" value="—" width={114} />
-                    <InfoField label="Address" value={person?.address ?? '—'} width={235} />
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: '16px', md: '32px' } }}>
+                    <InfoField label="Employer" value="—" />
+                    <InfoField label="Employment type" value="—" />
+                    <InfoField label="Years with employer" value="—" />
+                    <InfoField label="Address" value={person?.address ?? '—'} />
                   </Box>
                 </Box>
               </>
@@ -228,7 +228,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ email
           </Box>
 
           {/* ── Financial Overview — 3 metric cards ── */}
-          <Box className="flex gap-[5px]">
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' }, gap: '5px' }}>
             <FinancialMetric label="DEBT TO INCOME RATIO" value="34%" trend="Acceptable Risk" trendColor="#16A41D" showTrendIcon />
             <FinancialMetric label="PROBABILITY OF DEFAULT" value="10%" trend="2% since last credit update" trendColor="#16A41D" showTrendIcon />
             <FinancialMetric label="TOTAL EXPOSURE" value={displayLoan ? formatCurrency(displayLoan.totalAmount) : '—'} trend="Normal lending range" trendColor="#7F879E" showTrendIcon={false} />
@@ -248,7 +248,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ email
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
-                <XAxis dataKey="month" tick={{ fontFamily: '"DM Sans", sans-serif', fontSize: 10, fill: '#7F879E' }} axisLine={false} tickLine={false} interval={0} />
+                <XAxis dataKey="month" tick={{ fontFamily: '"DM Sans", sans-serif', fontSize: 10, fill: '#7F879E' }} axisLine={false} tickLine={false} interval="equidistantPreserveStart" />
                 <YAxis domain={[0, 900]} ticks={[0, 300, 600, 900]} tick={{ fontFamily: '"DM Sans", sans-serif', fontSize: 11, fill: '#7F879E' }} axisLine={false} tickLine={false} />
                 <Tooltip
                   contentStyle={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', borderRadius: '12px', border: 'none', color: 'white', backgroundColor: '#2E2C46', padding: '14px 18px' }}
@@ -262,8 +262,8 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ email
           </Box>
         </Box>
 
-        {/* ─── RIGHT PANEL (467px) ─── */}
-        <Box className="flex flex-col" sx={{ width: 467 }}>
+        {/* ─── RIGHT PANEL ─── */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', width: { xs: '100%', lg: 467 } }}>
           <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '1px solid #F0F0F0', p: '20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
 
             {/* Applications header */}
@@ -299,7 +299,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ email
                 </Box>
 
                 {/* Loan details row */}
-                <Box className="flex items-start" sx={{ mb: '20px' }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: { xs: '12px', md: 0 }, mb: '20px' }}>
                   <Box sx={{ flex: 1 }}>
                     <Typography sx={{ ...labelSx, mb: '2px' }}>Requested amount</Typography>
                     <Typography sx={{ ...valueSx, fontWeight: 700 }}>{formatCurrency(displayLoan.principleAmount)}</Typography>
@@ -495,9 +495,9 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ email
 
 /* ─── Sub-components ─── */
 
-function InfoField({ label, value, width }: { label: string; value: string; width?: number }) {
+function InfoField({ label, value }: { label: string; value: string; width?: number }) {
   return (
-    <Box sx={{ width: width ?? 'auto', minWidth: 0 }}>
+    <Box sx={{ minWidth: { xs: 'calc(50% - 16px)', md: 'auto' }, flex: { xs: '1 1 auto', md: 'none' } }}>
       <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 500, fontSize: '11px', lineHeight: '16px', color: '#7F879E', mb: '16px' }}>
         {label}
       </Typography>
@@ -510,7 +510,7 @@ function InfoField({ label, value, width }: { label: string; value: string; widt
 
 function FinancialMetric({ label, value, trend, trendColor, showTrendIcon }: { label: string; value: string; trend: string; trendColor: string; showTrendIcon: boolean }) {
   return (
-    <Box sx={{ flex: 1, height: 117, bgcolor: 'white', borderRadius: '8px', border: '1px solid #F0F0F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: '20px', py: '12px' }}>
+    <Box sx={{ height: 117, bgcolor: 'white', borderRadius: '8px', border: '1px solid #F0F0F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: '20px', py: '12px' }}>
       <Box className="flex flex-col" sx={{ gap: '13px' }}>
         <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: '10px', lineHeight: '16px', color: '#7F879E', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           {label}

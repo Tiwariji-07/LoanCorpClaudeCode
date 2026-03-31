@@ -142,13 +142,13 @@ export default function DashboardPage() {
   return (
     <>
       {/* Title row */}
-      <Box className="flex items-center justify-between" sx={{ width: '100%' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: { xs: '12px', sm: 0 }, width: '100%' }}>
         <Typography
           sx={{
             fontFamily: '"DM Sans", sans-serif',
             fontWeight: 700,
-            fontSize: '36px',
-            lineHeight: '44px',
+            fontSize: { xs: '28px', md: '36px' },
+            lineHeight: { xs: '36px', md: '44px' },
             color: '#2E2C46',
             textTransform: 'capitalize',
           }}
@@ -217,13 +217,12 @@ export default function DashboardPage() {
             Failed to load account summary.
           </Alert>
         ) : (
-          <Box className="flex gap-[10px] items-center" sx={{ width: '100%' }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: 'repeat(4, 1fr)' }, gap: '10px', width: '100%' }}>
             {statCards.map((card) => (
               <Card
                 key={card.label}
                 elevation={0}
                 sx={{
-                  flex: 1,
                   height: 117,
                   display: 'flex',
                   alignItems: 'center',
@@ -307,7 +306,7 @@ export default function DashboardPage() {
 
         {/* Two-column loans area */}
         <Box className="flex flex-col gap-[10px] items-start" sx={{ width: '100%' }}>
-          <Box className="flex gap-[10px] items-center justify-center" sx={{ width: '100%' }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: '10px', alignItems: 'stretch', width: '100%' }}>
             <ActiveLoansCard loans={activeLoans} loading={loansLoading} error={loansError} onRetry={refetchLoans} />
             <LoanInProgressCard loans={inProgressLoans} loading={loansLoading} error={loansError} onRetry={refetchLoans} />
           </Box>
@@ -326,7 +325,8 @@ function ActiveLoansCard({ loans, loading, error, onRetry }: { loans: Loan[]; lo
       elevation={0}
       sx={{
         flex: 1,
-        height: 412,
+        minHeight: { xs: 300, md: 412 },
+        height: { xs: 'auto', md: 412 },
         bgcolor: 'white',
         borderRadius: '12px',
         boxShadow: '0px 12px 100px 0px rgba(0,0,0,0.04)',
@@ -439,7 +439,8 @@ function LoanInProgressCard({ loans, loading, error, onRetry }: { loans: Loan[];
       elevation={0}
       sx={{
         flex: 1,
-        height: 412,
+        minHeight: { xs: 300, md: 412 },
+        height: { xs: 'auto', md: 412 },
         bgcolor: 'white',
         borderRadius: '12px',
         boxShadow: '0px 12px 100px 0px rgba(0,0,0,0.04)',
@@ -492,7 +493,7 @@ function ApplicationEntry({ loan }: { loan: Loan }) {
           Application ID {loan.applicationId ?? `LC${loan.id}`}
         </Typography>
         <Box className="flex flex-col gap-[16px]">
-          <Box className="flex items-center justify-between">
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
             <FieldWithIcon iconSrc="/icons/loan/loan-type.png" label="Loan type" value={loan.loanType?.displayName ?? '—'} />
             <FieldWithIcon iconSrc="/icons/loan/loan-amount.png" label="Requested Amount" value={formatCurrency(loan.principleAmount)} />
             <FieldWithIcon iconSrc="/icons/loan/current-stage.png" label="Current stage" value={loan.loanStatus?.displayName ?? '—'} />
@@ -527,7 +528,7 @@ function MilestonesCard() {
   return (
     <Card
       elevation={0}
-      sx={{ width: '100%', height: 370, bgcolor: 'white', borderRadius: '12px', boxShadow: '0px 12px 100px 0px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: '40px' }}
+      sx={{ width: '100%', height: { xs: 'auto', md: 370 }, bgcolor: 'white', borderRadius: '12px', boxShadow: '0px 12px 100px 0px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: '40px', pb: { xs: '20px', md: 0 } }}
     >
       <Box className="flex items-center justify-between" sx={{ height: 55, pt: '20px', pb: '16px', px: '20px', flexShrink: 0 }}>
         <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: '18px', lineHeight: '24px', letterSpacing: '0.15px', color: '#2E2C46' }}>
@@ -538,12 +539,12 @@ function MilestonesCard() {
         </Button>
       </Box>
       <Box className="flex flex-col gap-[16px]" sx={{ px: '24px', flex: 1, minHeight: 0 }}>
-        <Box sx={{ width: '100%', height: 70, position: 'relative', flexShrink: 0 }}>
+        <Box sx={{ width: '100%', height: 70, position: 'relative', flexShrink: 0, display: { xs: 'none', md: 'block' } }}>
           <Image src="/icons/milestone/timeline-bar.png" alt="Milestone timeline" fill style={{ objectFit: 'contain', objectPosition: 'center' }} />
         </Box>
-        <Box className="flex items-start" sx={{ flex: 1, minHeight: 0 }}>
+        <Box sx={{ display: 'flex', flexWrap: { xs: 'wrap', md: 'nowrap' }, alignItems: 'flex-start', gap: { xs: '16px', md: 0 }, flex: 1, minHeight: 0 }}>
           {MILESTONES.map((m) => (
-            <Box key={m.title} className="flex flex-col items-center gap-[4px]" sx={{ flex: 1, height: '100%' }}>
+            <Box key={m.title} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', flex: { xs: '1 1 calc(50% - 8px)', md: 1 }, minWidth: { xs: 'calc(50% - 8px)', md: 0 }, height: { xs: 'auto', md: '100%' } }}>
               <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: '14px', lineHeight: '20px', letterSpacing: '0.1px', color: '#2E2C46', textAlign: 'center' }}>{m.title}</Typography>
               <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: '12px', lineHeight: '16px', color: '#7F879E', textAlign: 'center', whiteSpace: 'pre-line' }}>{m.description}</Typography>
               <Box className="flex flex-col items-center gap-[3px]" sx={{ mt: '9px' }}>

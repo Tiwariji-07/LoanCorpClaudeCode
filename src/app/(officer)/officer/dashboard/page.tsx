@@ -285,13 +285,13 @@ export default function OfficerDashboardPage() {
   return (
     <Box sx={{ width: "100%", maxWidth: 1304 }}>
       {/* Title row */}
-      <Box className="flex items-center justify-between" sx={{ mb: "24px" }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: { xs: '12px', sm: 0 }, mb: "24px" }}>
         <Typography
           sx={{
             fontFamily: '"DM Sans", sans-serif',
             fontWeight: 700,
-            fontSize: "36px",
-            lineHeight: "44px",
+            fontSize: { xs: '28px', md: "36px" },
+            lineHeight: { xs: '36px', md: "44px" },
             color: "#2E2C46",
           }}
         >
@@ -318,12 +318,11 @@ export default function OfficerDashboardPage() {
       </Box>
 
       {/* ─── Metrics Row ─── */}
-      <Box className="flex gap-[5px]" sx={{ mb: "6px" }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: `repeat(${METRIC_DEFS.length}, 1fr)` }, gap: '5px', mb: "6px" }}>
         {METRIC_DEFS.map((metric, idx) => (
           <Box
             key={metric.label}
             sx={{
-              flex: 1,
               height: 117,
               bgcolor: "white",
               borderRadius: "8px",
@@ -419,8 +418,7 @@ export default function OfficerDashboardPage() {
       >
         {/* Search + Filter bar */}
         <Box
-          className="flex items-center justify-between"
-          sx={{ px: "30px", pt: "24px", pb: "11px" }}
+          sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between', gap: { xs: '12px', md: 0 }, px: { xs: '16px', md: "30px" }, pt: "24px", pb: "11px" }}
         >
           <TextField
             value={search}
@@ -437,7 +435,7 @@ export default function OfficerDashboardPage() {
               },
             }}
             sx={{
-              width: 450,
+              width: { xs: '100%', md: 450 },
               "& .MuiOutlinedInput-root": {
                 height: 40,
                 borderRadius: "8px",
@@ -508,7 +506,7 @@ export default function OfficerDashboardPage() {
         </Box>
 
         {/* Table */}
-        <TableContainer>
+        <TableContainer sx={{ overflowX: 'auto' }}>
           <Table>
             <TableHead>
               <TableRow>
@@ -665,10 +663,15 @@ export default function OfficerDashboardPage() {
 
         {/* Pagination */}
         <Box
-          className="flex items-center justify-between"
           sx={{
-            px: "50px",
-            height: 40,
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: { xs: '8px', sm: 0 },
+            px: { xs: '16px', md: "50px" },
+            height: { xs: 'auto', sm: 40 },
+            py: { xs: '8px', sm: 0 },
             borderTop: "1px solid #F0F0F0",
           }}
         >

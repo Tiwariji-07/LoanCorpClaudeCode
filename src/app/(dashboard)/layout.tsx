@@ -29,11 +29,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const user = useAuthStore((s) => s.user)
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#F8F9FD' }}>
-      {/* Sidebar — Figma: Navigation Rail, 80px, #F8F9FD bg, right border */}
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#F8F9FD', pb: { xs: '64px', md: 0 } }}>
+      {/* Sidebar — hidden on mobile, shown on md+ */}
       <Drawer
         variant="permanent"
         sx={{
+          display: { xs: 'none', md: 'block' },
           width: SIDEBAR_WIDTH,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
@@ -51,7 +52,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           },
         }}
       >
-        {/* Logo — Figma: 23×27px icon-only brandmark (not the full text logo) */}
         <Image
           src="/icons/common/sidebar-icon.png"
           alt="LoanCorp"
@@ -60,7 +60,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           style={{ flexShrink: 0 }}
         />
 
-        {/* Nav items */}
         <List
           sx={{
             display: 'flex',
@@ -111,6 +110,67 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           })}
         </List>
       </Drawer>
+
+      {/* Mobile bottom navigation */}
+      <Box
+        component="nav"
+        sx={{
+          display: { xs: 'flex', md: 'none' },
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 64,
+          bgcolor: 'white',
+          borderTop: '1px solid',
+          borderColor: '#E5E5EC',
+          alignItems: 'center',
+          justifyContent: 'space-around',
+          zIndex: 100,
+        }}
+      >
+        {NAV_ITEMS.map((item) => {
+          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+          return (
+            <ListItemButton
+              key={item.href}
+              component={Link}
+              href={item.href}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                flex: 1,
+                height: '100%',
+                minWidth: 0,
+                p: 0,
+                borderRadius: 0,
+                bgcolor: 'transparent',
+              }}
+            >
+              <Image
+                src={item.icon}
+                alt={item.label}
+                width={20}
+                height={20}
+                style={{ opacity: isActive ? 1 : 0.5 }}
+              />
+              <Typography
+                sx={{
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontWeight: isActive ? 600 : 400,
+                  fontSize: '10px',
+                  color: isActive ? '#474DDD' : '#7F879E',
+                }}
+              >
+                {item.label}
+              </Typography>
+            </ListItemButton>
+          )
+        })}
+      </Box>
 
       {/* Main area */}
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
@@ -181,9 +241,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             display: 'flex',
             flexDirection: 'column',
             gap: '24px',
-            px: '28px',
-            pt: '30px',
-            pb: '28px',
+            px: { xs: '12px', sm: '20px', md: '28px' },
+            pt: { xs: '16px', md: '30px' },
+            pb: { xs: '16px', md: '28px' },
             alignItems: 'center',
           }}
         >

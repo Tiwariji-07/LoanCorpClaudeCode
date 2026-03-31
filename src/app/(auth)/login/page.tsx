@@ -74,19 +74,21 @@ export default function LoginPage() {
   }
 
   return (
-    <Box className="flex items-start" sx={{ minHeight: '100vh', width: '100%' }}>
+    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'flex-start', minHeight: '100vh', width: '100%' }}>
       {/* ── Left panel: hero with background image ── */}
       <Box
         sx={{
-          width: 886,
-          height: '100vh',
+          width: { xs: '100%', md: 886 },
+          height: { xs: 'auto', md: '100vh' },
+          minHeight: { xs: 300, md: 'auto' },
           flexShrink: 0,
           position: 'relative',
-          display: 'flex',
+          display: { xs: 'none', md: 'flex' },
           flexDirection: 'column',
           gap: '24px',
           justifyContent: 'center',
-          px: '180px',
+          px: { xs: '24px', sm: '60px', md: '180px' },
+          py: { xs: '40px', md: 0 },
         }}
       >
         {/* Background image from Figma */}
@@ -154,7 +156,7 @@ export default function LoginPage() {
       {/* ── Right panel: login form ── */}
       <Box
         sx={{
-          width: 554,
+          width: { xs: '100%', md: 554 },
           flexShrink: 0,
           alignSelf: 'stretch',
           bgcolor: 'white',
@@ -163,7 +165,9 @@ export default function LoginPage() {
           gap: '40px',
           alignItems: 'center',
           justifyContent: 'center',
-          px: '56px',
+          px: { xs: '20px', sm: '40px', md: '56px' },
+          py: { xs: '40px', md: 0 },
+          minHeight: { xs: '100vh', md: 'auto' },
         }}
       >
         {/* Logo + title */}

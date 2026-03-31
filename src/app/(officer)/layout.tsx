@@ -39,11 +39,12 @@ export default function OfficerLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#F8F9FD' }}>
-      {/* Sidebar */}
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#F8F9FD', pb: { xs: '64px', md: 0 } }}>
+      {/* Sidebar — hidden on mobile */}
       <Drawer
         variant="permanent"
         sx={{
+          display: { xs: 'none', md: 'block' },
           width: SIDEBAR_WIDTH,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
@@ -61,7 +62,6 @@ export default function OfficerLayout({ children }: { children: ReactNode }) {
           },
         }}
       >
-        {/* Logo */}
         <Image
           src="/icons/common/sidebar-icon.png"
           alt="LoanCorp"
@@ -70,7 +70,6 @@ export default function OfficerLayout({ children }: { children: ReactNode }) {
           style={{ flexShrink: 0 }}
         />
 
-        {/* Nav items */}
         <List
           sx={{
             display: 'flex',
@@ -120,7 +119,6 @@ export default function OfficerLayout({ children }: { children: ReactNode }) {
           })}
         </List>
 
-        {/* Logout */}
         <IconButton
           onClick={handleLogout}
           size="small"
@@ -129,6 +127,62 @@ export default function OfficerLayout({ children }: { children: ReactNode }) {
           <LogoutIcon sx={{ fontSize: 20 }} />
         </IconButton>
       </Drawer>
+
+      {/* Mobile bottom navigation */}
+      <Box
+        component="nav"
+        sx={{
+          display: { xs: 'flex', md: 'none' },
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 64,
+          bgcolor: 'white',
+          borderTop: '1px solid',
+          borderColor: '#E5E5EC',
+          alignItems: 'center',
+          justifyContent: 'space-around',
+          zIndex: 100,
+        }}
+      >
+        {NAV_ITEMS.map((item) => {
+          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+          return (
+            <ListItemButton
+              key={item.href}
+              component={Link}
+              href={item.href}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                flex: 1,
+                height: '100%',
+                minWidth: 0,
+                p: 0,
+                borderRadius: 0,
+              }}
+            >
+              <Image src={item.icon} alt={item.label} width={20} height={20} style={{ opacity: isActive ? 1 : 0.5 }} />
+              <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: isActive ? 600 : 400, fontSize: '10px', color: isActive ? '#474DDD' : '#7F879E' }}>
+                {item.label}
+              </Typography>
+            </ListItemButton>
+          )
+        })}
+        <Box
+          onClick={handleLogout}
+          sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px', flex: 1, height: '100%', cursor: 'pointer' }}
+        >
+          <LogoutIcon sx={{ fontSize: 20, color: '#7F879E' }} />
+          <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 400, fontSize: '10px', color: '#7F879E' }}>
+            Logout
+          </Typography>
+        </Box>
+      </Box>
 
       {/* Main area */}
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
@@ -221,9 +275,9 @@ export default function OfficerLayout({ children }: { children: ReactNode }) {
             display: 'flex',
             flexDirection: 'column',
             gap: '24px',
-            px: '28px',
-            pt: '30px',
-            pb: '28px',
+            px: { xs: '12px', sm: '20px', md: '28px' },
+            pt: { xs: '16px', md: '30px' },
+            pb: { xs: '16px', md: '28px' },
             alignItems: 'center',
           }}
         >

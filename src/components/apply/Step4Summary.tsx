@@ -79,7 +79,7 @@ export default function Step4Summary({ personData, loanData }: Props) {
         icon={<AccountBalanceOutlinedIcon sx={{ fontSize: 20, color: '#474DDD' }} />}
         title="Loan details"
       >
-        <Box className="flex gap-[32px] items-center">
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '32px', alignItems: 'center' }}>
           {loanFields.map((f) => (
             <InfoField key={f.label} label={f.label} value={f.value} width="auto" />
           ))}

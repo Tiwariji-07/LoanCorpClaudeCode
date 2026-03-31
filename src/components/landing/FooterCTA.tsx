@@ -15,9 +15,10 @@ export default function FooterCTA({ title, buttonLabel, onAction }: FooterCTAPro
     <Box
       sx={{
         display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 6,
+        gap: { xs: 3, sm: 6 },
         bgcolor: 'primary.main',
         py: 8,
         px: 6,
@@ -28,8 +29,9 @@ export default function FooterCTA({ title, buttonLabel, onAction }: FooterCTAPro
         sx={{
           fontFamily: '"DM Sans", sans-serif',
           fontWeight: 700,
-          fontSize: '24px',
-          lineHeight: '32px',
+          fontSize: { xs: '20px', sm: '24px' },
+          lineHeight: { xs: '28px', sm: '32px' },
+          textAlign: 'center',
           color: 'white',
         }}
       >

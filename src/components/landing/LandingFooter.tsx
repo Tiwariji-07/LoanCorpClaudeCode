@@ -34,10 +34,10 @@ export default function LandingFooter() {
     <Box
       component="footer"
       className="flex flex-col"
-      sx={{ px: '94px', pt: '52px', pb: '32px', gap: '52px' }}
+      sx={{ px: { xs: '20px', sm: '40px', md: '94px' }, pt: '52px', pb: '32px', gap: '52px' }}
     >
       {/* Top row — Figma: 234px gap between brand and nav columns */}
-      <Box className="flex items-start justify-center" sx={{ gap: '234px' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'flex-start', justifyContent: 'center', gap: { xs: '32px', md: '234px' } }}>
         {/* Brand info — Figma: flex-1 */}
         <Box className="flex flex-col gap-[8px]" sx={{ flex: 1 }}>
           <Image src="/icons/common/logo.png" alt="Loan Corp" width={122} height={28} />
@@ -58,7 +58,7 @@ export default function LandingFooter() {
         </Box>
 
         {/* Link groups — Figma: 522.25px wide, 55px gap between columns */}
-        <Box className="flex items-start" sx={{ gap: '55px', width: 522 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: { xs: '32px', md: '55px' }, width: { xs: '100%', md: 522 } }}>
           {LINK_GROUPS.map((group) => (
             <Box key={group.title} className="flex flex-col gap-[20px]" sx={{ flex: 1 }}>
               {/* Figma: DM Sans Bold 18px, #2E2C46 */}

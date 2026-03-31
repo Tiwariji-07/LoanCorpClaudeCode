@@ -117,7 +117,7 @@ export default function MilestoneTimeline({ milestones, onViewAll }: MilestoneTi
         </Box>
 
         {/* Milestone items */}
-        <Box sx={{ display: 'flex', gap: '144px', justifyContent: 'center' }}>
+        <Box sx={{ display: 'flex', flexWrap: { xs: 'wrap', md: 'nowrap' }, gap: { xs: '24px', md: '144px' }, justifyContent: 'center' }}>
           {milestones.map((m) => (
             <Box
               key={m.title}
